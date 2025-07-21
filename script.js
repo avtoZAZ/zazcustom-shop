@@ -1,103 +1,193 @@
-// Ждем, пока вся HTML-страница полностью загрузится
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- ЛОГИКА КОРЗИНЫ (остается без изменений) ---
+    // --- 1. ЛОГИКА КОРЗИНЫ (ГЛОБАЛЬНАЯ) ---
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const cartLink = document.getElementById('cart-link');
 
-    function updateCartCounter() { /*...*/ }
-    function saveCart() { /*...*/ }
-    function addToCart(product) { /*...*/ }
+    function saveCart() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }
 
-    const addToCartButtons = document.querySelectorAll('.btn-buy, .btn-buy-lg');
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            const productCard = event.target.closest('[data-id]');
-            if (productCard) {
-                const product = {
-                    id: productCard.dataset.id,
-                    name: productCard.dataset.name,
-                    price: parseFloat(productCard.dataset.price),
-                };
-                addToCart(product);
-            }
-        });
-    });
+    function updateCartCounter() {
+        const cartLink = document.getElementById('cart-link');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        if (cartLink) {
+            cartLink.textContent = `Корзина (${totalItems})`;
+        }
+    }
 
-    const sizeSelector = document.querySelector('.size-selector');
-    if (sizeSelector) {
-        const sizeButtons = sizeSelector.querySelectorAll('.size-btn');
-        sizeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                sizeButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
+    // --- 2. ЛОГИКА ДЛЯ ВСЕХ СТРАНИЦ, КРОМЕ КОРЗИНЫ ---
+    if (!document.body.classList.contains('cart-page')) {
+        const addToCartButtons = document.querySelectorAll('.btn-buy, .btn-buy-lg');
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const productCard = event.target.closest('[data-id]');
+                if (productCard) {
+                    const product = {
+                        id: productCard.dataset.id,
+                        name: productCard.dataset.name,
+                        price: parseFloat(productCard.dataset.price),
+                        image: productCard.querySelector('.product-image-primary')?.src || productCard.querySelector('.product-image')?.src
+                    };
+                    
+                    const existingItem = cart.find(item => item.id === product.id);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        cart.push({ ...product, quantity: 1 });
+                    }
+                    saveCart();
+                    updateCartCounter();
+                    alert(`"${product.name}" додано до корзини!`);
+                }
             });
         });
     }
-    updateCartCounter();
 
-    // --- НОВАЯ ЛОГИКА ДЛЯ СТАТИЧЕСКОЙ КАПЧИ ---
-    const captchaLabel = document.getElementById('captcha-label');
-    const contactForm = document.getElementById('contact-form');
+    // --- 3. ЛОГИКА ТОЛЬКО ДЛЯ СТРАНИЦЫ КОРЗИНЫ ---
+    if (document.body.classList.contains('cart-page')) {
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const cartSummary = document.getElementById('cart-summary');
+        const emptyCartMessage = document.getElementById('empty-cart-message');
+        const cartTotalPriceEl = document.getElementById('cart-total-price');
+        const orderForm = document.getElementById('order-form');
 
-    // Эта часть сработает, только если мы на странице контактов
-    if (captchaLabel && contactForm) {
-        
-        // Функция генерации нового вопроса капчи
-        function generateCaptcha() {
-            const num1 = Math.floor(Math.random() * 10) + 1; // Случайное число от 1 до 10
-            const num2 = Math.floor(Math.random() * 10) + 1; // Случайное число от 1 до 10
-            captchaLabel.textContent = `Перевірка: Скільки буде ${num1} + ${num2}?`;
+        function renderCart() {
+            cartItemsContainer.innerHTML = '';
+            if (cart.length === 0) {
+                cartSummary.classList.add('cart-summary-hidden');
+                emptyCartMessage.classList.remove('empty-cart-message-hidden');
+                return;
+            }
+
+            cartSummary.classList.remove('cart-summary-hidden');
+            emptyCartMessage.classList.add('empty-cart-message-hidden');
+            
+            let totalPrice = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                totalPrice += itemTotal;
+
+                const cartItemEl = document.createElement('div');
+                cartItemEl.className = 'cart-item';
+                cartItemEl.innerHTML = `
+                    <img src="${item.image || 'https://via.placeholder.com/100x120'}" alt="${item.name}" class="cart-item-image">
+                    <div class="cart-item-info">
+                        <h3 class="cart-item-title">${item.name}</h3>
+                        <p class="cart-item-price">${item.price} грн</p>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="quantity-btn" data-id="${item.id}" data-action="increase">+</button>
+                    </div>
+                    <button class="cart-item-remove" data-id="${item.id}">Видалити</button>
+                `;
+                cartItemsContainer.appendChild(cartItemEl);
+            });
+
+            cartTotalPriceEl.textContent = totalPrice;
+            addCartEventListeners();
         }
 
-        // Генерируем вопрос при загрузке страницы
-        generateCaptcha();
+        function addCartEventListeners() {
+            const removeButtons = document.querySelectorAll('.cart-item-remove');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    cart = cart.filter(item => item.id !== id);
+                    saveCart();
+                    renderCart();
+                    updateCartCounter();
+                });
+            });
 
-        // --- ОБНОВЛЕННАЯ ЛОГИКА ОТПРАВКИ ФОРМЫ ---
-        const statusMessage = document.getElementById('form-status');
-        const submitButton = document.getElementById('submit-btn');
+            const quantityButtons = document.querySelectorAll('.quantity-btn');
+            quantityButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const action = e.target.dataset.action;
+                    const itemInCart = cart.find(item => item.id === id);
 
-        contactForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+                    if (action === 'increase') {
+                        itemInCart.quantity++;
+                    } else if (action === 'decrease') {
+                        if (itemInCart.quantity > 1) {
+                            itemInCart.quantity--;
+                        } else {
+                            cart = cart.filter(item => item.id !== id);
+                        }
+                    }
+                    saveCart();
+                    renderCart();
+                    updateCartCounter();
+                });
+            });
+        }
+        
+        // --- ОБРАБОТКА ФОРМЫ ЗАКАЗА ---
+        orderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const orderStatus = document.getElementById('order-status');
+            
+            const customerName = document.getElementById('customer-name').value;
+            const customerPhone = document.getElementById('customer-phone').value;
+            const customerComment = document.getElementById('customer-comment').value;
 
-            const formData = new FormData(contactForm);
-            const name = formData.get('name');
-            const email = formData.get('email');
-            const message = formData.get('message');
-            // Получаем вопрос и ответ пользователя
-            const captchaQuestion = captchaLabel.textContent;
-            const captchaAnswer = formData.get('captcha');
+            // Формируем красивое сообщение для Telegram
+            let orderMessage = `
+🚨 *Нове замовлення з сайту ZAZcustom!* 🚨
 
-            submitButton.disabled = true;
-            statusMessage.textContent = 'Відправка...';
+👤 **Клієнт:** ${customerName}
+📞 **Телефон:** ${customerPhone}
+💬 **Коментар:** ${customerComment || 'Немає'}
 
+---
+🛒 **Склад замовлення:**
+`;
+            let total = 0;
+            cart.forEach(item => {
+                orderMessage += `
+- ${item.name}
+  *Кількість:* ${item.quantity}
+  *Ціна:* ${item.price} грн
+`;
+                total += item.price * item.quantity;
+            });
+
+            orderMessage += `
+---
+💰 **Загальна сума:** *${total} грн*
+`;
+            
+            orderStatus.textContent = "Відправка...";
+            
             try {
                 const response = await fetch('/api/send-message', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, message, captchaQuestion, captchaAnswer }),
+                    // Отправляем ОДНО большое сообщение
+                    body: JSON.stringify({ message: orderMessage, type: 'order' })
                 });
 
-                const result = await response.json();
-
                 if (response.ok) {
-                    statusMessage.textContent = 'Повідомлення успішно відправлено!';
-                    statusMessage.style.color = '#28a745';
-                    contactForm.reset();
-                    generateCaptcha(); // Генерируем новый вопрос после успешной отправки
+                    orderStatus.textContent = "✅ Замовлення успішно відправлено!";
+                    cart = []; // Очищаем корзину
+                    saveCart();
+                    renderCart();
+                    updateCartCounter();
                 } else {
-                    statusMessage.textContent = `Помилка: ${result.message}`;
-                    statusMessage.style.color = '#dc3545';
-                    generateCaptcha(); // Генерируем новый вопрос даже при ошибке
+                    const result = await response.json();
+                    orderStatus.textContent = `Помилка: ${result.message}`;
                 }
-
             } catch (error) {
-                console.error('Network error:', error);
-                statusMessage.textContent = 'Помилка мережі. Спробуйте пізніше.';
-                statusMessage.style.color = '#dc3545';
-            } finally {
-                submitButton.disabled = false;
+                orderStatus.textContent = 'Помилка мережі.';
             }
         });
+
+        renderCart(); // Первая отрисовка корзины при загрузке страницы
     }
+
+    // --- ОБЩАЯ ИНИЦИАЛИЗАЦИЯ ---
+    updateCartCounter();
 });

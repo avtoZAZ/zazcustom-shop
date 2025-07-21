@@ -659,3 +659,75 @@ a {
     /* Выравниваем всю сетку по центру */
     justify-content: center; 
 }
+/* --- 15. СТИЛИ ДЛЯ КОРЗИНЫ --- */
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.cart-item-image {
+    width: 100px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+.cart-item-info {
+    flex-grow: 1; /* Занимает все доступное место */
+}
+.cart-item-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+.cart-item-price {
+    font-size: 16px;
+    color: var(--accent-color);
+}
+.cart-item-quantity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.quantity-btn {
+    width: 30px;
+    height: 30px;
+    background: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 18px;
+}
+.cart-item-remove {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+.cart-item-remove:hover {
+    color: #fff;
+}
+
+/* Итог и форма заказа */
+#cart-summary {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid var(--accent-color);
+}
+.cart-total {
+    font-size: 24px;
+    text-align: right;
+    margin-bottom: 40px;
+}
+.order-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Скрываем/показываем блоки для пустой/полной корзины */
+.cart-summary-hidden, .empty-cart-message-hidden {
+    display: none;
+}
