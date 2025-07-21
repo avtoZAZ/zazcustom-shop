@@ -6,11 +6,9 @@
     <title>Контакти - ZAZcustom</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
 </head>
 <body>
-<!-- Вставьте этот header во ВСЕ ваши HTML файлы -->
+
 <header class="header">
     <div class="container">
         <div class="header-inner">
@@ -21,7 +19,6 @@
                 <a href="about.html" class="nav-link">Про нас</a>
                 <a href="contacts.html" class="nav-link">Контакти</a>
             </nav>
-            <!-- Ссылку на корзину мы пока не делаем, так как для нее нужен JavaScript -->
             <a href="#" id="cart-link" class="cart-link">Корзина (0)</a>
         </div>
     </div>
@@ -38,28 +35,29 @@
                     <p><strong>Години роботи:</strong> Пн-Сб, 10:00 - 19:00</p>
                 </div>
                <form class="contact-form" id="contact-form">
-    <h3>Напишіть нам</h3>
-    <div class="form-group">
-        <label for="name">Ваше ім'я</label>
-        <input type="text" id="name" name="name" required>
-    </div>
-    <div class="form-group">
-        <label for="email">Ваш Email</label>
-        <input type="email" id="email" name="email" required>
-    </div>
-    <div class="form-group">
-        <label for="message">Повідомлення</label>
-        <textarea id="message" name="message" rows="5" required></textarea>
-    </div>
+                    <h3>Напишіть нам</h3>
+                    <div class="form-group">
+                        <label for="name">Ваше ім'я</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Ваш Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Повідомлення</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
 
-    <!-- ВИДЖЕТ CAPTCHA -->
-    <div class="cf-turnstile" data-sitekey="0x4AAAAAABl9FGQokc0epMNl"></div>
-
-    <button type="submit" class="btn" id="submit-btn">Відправити</button>
-
-    <!-- МЕСТО ДЛЯ СТАТУСА ОТПРАВКИ -->
-    <p id="form-status"></p>
-</form>
+                    <!-- БЛОК СТАТИЧЕСКОЙ КАПЧИ -->
+                    <div class="form-group">
+                        <label for="captcha" id="captcha-label">Перевірка: Скільки буде 5 + 3?</label>
+                        <input type="text" id="captcha" name="captcha" required autocomplete="off">
+                    </div>
+                    
+                    <button type="submit" class="btn" id="submit-btn">Відправити</button>
+                    <p id="form-status"></p>
+                </form>
             </div>
         </div>
     </main>
