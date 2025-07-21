@@ -15,35 +15,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 2. ЛОГИКА ДЛЯ ВСЕХ СТРАНИЦ, КРОМЕ КОРЗИНЫ ---
-    if (!document.body.classList.contains('cart-page')) {
-        const addToCartButtons = document.querySelectorAll('.btn-buy, .btn-buy-lg');
-        addToCartButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const productCard = event.target.closest('[data-id]');
-                if (productCard) {
-                    const product = {
-                        id: productCard.dataset.id,
-                        name: productCard.dataset.name,
-                        price: parseFloat(productCard.dataset.price),
-                        image: productCard.querySelector('.product-image-primary')?.src || productCard.querySelector('.product-image')?.src
-                    };
-                    
-                    const existingItem = cart.find(item => item.id === product.id);
-                    if (existingItem) {
-                        existingItem.quantity++;
-                    } else {
-                        cart.push({ ...product, quantity: 1 });
-                    }
-                    saveCart();
-                    updateCartCounter();
-                    alert(`"${product.name}" додано до корзини!`);
-                }
-            });
+    // --- 2. ЛОГИКА ДОБАВЛЕНИЯ В КОРЗИНУ (для всех страниц) ---
+    const addToCartButtons = document.querySelectorAll('.btn-buy, .btn-buy-lg');
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            const productCard = event.target.closest('[data-id]');
+            if (!productCard) return;
+
+            // Определяем выбранный размер
+            let selectedSize = 'One Size'; // Размер по умолчанию
+            const sizeSelector = productCard.querySelector('.size-selector .active');
+            if (sizeSelector) {
+                selectedSize = sizeSelector.textContent;
+            }
+
+            const product = {
+                id: productCard.dataset.id,
+                name: productCard.dataset.name,
+                price: parseFloat(productCard.dataset.price),
+                // Ищем основное фото товара
+                image: productCard.querySelector('.product-image-primary')?.src || productCard.querySelector('.main-product-image')?.src || productCard.querySelector('.product-image')?.src
+            };
+
+            // Создаем уникальный ID для товара с учетом размера (например, "p1_M")
+            const cartItemId = `${product.id}_${selectedSize}`;
+
+            const existingItem = cart.find(item => item.cartId === cartItemId);
+
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ 
+                    ...product, 
+                    size: selectedSize, 
+                    quantity: 1, 
+                    cartId: cartItemId // Сохраняем уникальный ID
+                });
+            }
+
+            saveCart();
+            updateCartCounter();
+            alert(`"${product.name}" (Розмір: ${selectedSize}) додано до корзини!`);
         });
-    }
+    });
+
 
     // --- 3. ЛОГИКА ТОЛЬКО ДЛЯ СТРАНИЦЫ КОРЗИНЫ ---
+    // Убедитесь, что в cart.html у тега body есть класс "cart-page"
     if (document.body.classList.contains('cart-page')) {
         const cartItemsContainer = document.getElementById('cart-items-container');
         const cartSummary = document.getElementById('cart-summary');
@@ -54,13 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
         function renderCart() {
             cartItemsContainer.innerHTML = '';
             if (cart.length === 0) {
-                cartSummary.classList.add('cart-summary-hidden');
-                emptyCartMessage.classList.remove('empty-cart-message-hidden');
+                cartSummary.style.display = 'none';
+                emptyCartMessage.style.display = 'block';
                 return;
             }
 
-            cartSummary.classList.remove('cart-summary-hidden');
-            emptyCartMessage.classList.add('empty-cart-message-hidden');
+            cartSummary.style.display = 'block';
+            emptyCartMessage.style.display = 'none';
             
             let totalPrice = 0;
 
@@ -70,18 +88,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const cartItemEl = document.createElement('div');
                 cartItemEl.className = 'cart-item';
+                // Добавляем вывод размера
                 cartItemEl.innerHTML = `
-                    <img src="${item.image || 'https://via.placeholder.com/100x120'}" alt="${item.name}" class="cart-item-image">
+                    <img src="${item.image || 'https://via.placeholder.com/100x120/1a1a1a/e0e0e0?text=ZAZ'}" alt="${item.name}" class="cart-item-image">
                     <div class="cart-item-info">
                         <h3 class="cart-item-title">${item.name}</h3>
+                        <p class="cart-item-size">Розмір: ${item.size}</p> <!-- ВОТ ЗДЕСЬ -->
                         <p class="cart-item-price">${item.price} грн</p>
                     </div>
                     <div class="cart-item-quantity">
-                        <button class="quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
+                        <button class="quantity-btn" data-cart-id="${item.cartId}" data-action="decrease">-</button>
                         <span>${item.quantity}</span>
-                        <button class="quantity-btn" data-id="${item.id}" data-action="increase">+</button>
+                        <button class="quantity-btn" data-cart-id="${item.cartId}" data-action="increase">+</button>
                     </div>
-                    <button class="cart-item-remove" data-id="${item.id}">Видалити</button>
+                    <p class="cart-item-total-price">${itemTotal} грн</p>
+                    <button class="cart-item-remove" data-cart-id="${item.cartId}">×</button>
                 `;
                 cartItemsContainer.appendChild(cartItemEl);
             });
@@ -91,101 +112,99 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function addCartEventListeners() {
-            const removeButtons = document.querySelectorAll('.cart-item-remove');
-            removeButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const id = e.target.dataset.id;
-                    cart = cart.filter(item => item.id !== id);
-                    saveCart();
-                    renderCart();
-                    updateCartCounter();
-                });
-            });
+            cartItemsContainer.addEventListener('click', (e) => {
+                const target = e.target;
+                const cartId = target.dataset.cartId;
+                if (!cartId) return;
 
-            const quantityButtons = document.querySelectorAll('.quantity-btn');
-            quantityButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const id = e.target.dataset.id;
-                    const action = e.target.dataset.action;
-                    const itemInCart = cart.find(item => item.id === id);
+                if (target.classList.contains('cart-item-remove')) {
+                    cart = cart.filter(item => item.cartId !== cartId);
+                }
 
+                if (target.classList.contains('quantity-btn')) {
+                    const itemInCart = cart.find(item => item.cartId === cartId);
+                    const action = target.dataset.action;
                     if (action === 'increase') {
                         itemInCart.quantity++;
                     } else if (action === 'decrease') {
                         if (itemInCart.quantity > 1) {
                             itemInCart.quantity--;
                         } else {
-                            cart = cart.filter(item => item.id !== id);
+                            cart = cart.filter(item => item.cartId !== cartId);
                         }
                     }
-                    saveCart();
-                    renderCart();
-                    updateCartCounter();
-                });
+                }
+                
+                saveCart();
+                renderCart();
+                updateCartCounter();
             });
         }
         
-        // --- ОБРАБОТКА ФОРМЫ ЗАКАЗА ---
         orderForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            // ... (логика отправки заказа, будет изменена в следующем шаге)
             const orderStatus = document.getElementById('order-status');
-            
             const customerName = document.getElementById('customer-name').value;
             const customerPhone = document.getElementById('customer-phone').value;
             const customerComment = document.getElementById('customer-comment').value;
 
-            // Формируем красивое сообщение для Telegram
-            let orderMessage = `
-🚨 *Нове замовлення з сайту ZAZcustom!* 🚨
-
-👤 **Клієнт:** ${customerName}
-📞 **Телефон:** ${customerPhone}
-💬 **Коментар:** ${customerComment || 'Немає'}
-
----
-🛒 **Склад замовлення:**
-`;
+            let orderMessage = `🚨 *Нове замовлення з сайту ZAZcustom!* 🚨\n\n👤 **Клієнт:** ${customerName}\n📞 **Телефон:** ${customerPhone}\n💬 **Коментар:** ${customerComment || 'Немає'}\n\n---
+🛒 **Склад замовлення:**\n`;
             let total = 0;
             cart.forEach(item => {
-                orderMessage += `
-- ${item.name}
-  *Кількість:* ${item.quantity}
-  *Ціна:* ${item.price} грн
-`;
+                orderMessage += `\n- ${item.name}\n  *Розмір:* ${item.size}\n  *Кількість:* ${item.quantity}\n  *Ціна:* ${item.price} грн\n`; // Добавлен размер
                 total += item.price * item.quantity;
             });
 
-            orderMessage += `
----
-💰 **Загальна сума:** *${total} грн*
-`;
+            orderMessage += `\n---\n💰 **Загальна сума:** *${total} грн*`;
             
             orderStatus.textContent = "Відправка...";
+            orderStatus.style.color = 'var(--text-color)';
+            document.querySelector('#order-form button').disabled = true;
             
             try {
                 const response = await fetch('/api/send-message', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // Отправляем ОДНО большое сообщение
                     body: JSON.stringify({ message: orderMessage, type: 'order' })
                 });
 
                 if (response.ok) {
                     orderStatus.textContent = "✅ Замовлення успішно відправлено!";
-                    cart = []; // Очищаем корзину
+                    orderStatus.style.color = 'lightgreen';
+                    cart = [];
                     saveCart();
                     renderCart();
                     updateCartCounter();
+                    orderForm.reset();
                 } else {
                     const result = await response.json();
                     orderStatus.textContent = `Помилка: ${result.message}`;
+                    orderStatus.style.color = 'red';
                 }
             } catch (error) {
                 orderStatus.textContent = 'Помилка мережі.';
+                orderStatus.style.color = 'red';
+            } finally {
+                 document.querySelector('#order-form button').disabled = false;
             }
         });
 
-        renderCart(); // Первая отрисовка корзины при загрузке страницы
+        renderCart();
+    }
+    
+    // --- 4. ЛОГИКА ДЛЯ СТРАНИЦЫ ТОВАРА (ВЫБОР РАЗМЕРА) ---
+    const sizeSelectorContainer = document.querySelector('.size-selector');
+    if (sizeSelectorContainer) {
+        sizeSelectorContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('size-btn')) {
+                // Убираем 'active' у всех кнопок-соседей
+                sizeSelectorContainer.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+                // Добавляем 'active' только той, на которую кликнули
+                e.target.classList.add('active');
+            }
+        });
     }
 
     // --- ОБЩАЯ ИНИЦИАЛИЗАЦИЯ ---

@@ -731,3 +731,22 @@ a {
 .cart-summary-hidden, .empty-cart-message-hidden {
     display: none;
 }
+.cart-item-size {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 10px;
+}
+
+.cart-item-total-price {
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 100px; /* Чтобы колонка с ценой не прыгала */
+    text-align: right;
+}
+
+.cart-item-remove {
+    font-size: 24px;
+    line-height: 1;
+    padding: 0 10px;
+    font-weight: 300;
+}
