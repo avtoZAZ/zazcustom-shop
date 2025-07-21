@@ -535,36 +535,42 @@ a {
 }
 /* --- 13. ЭФФЕКТ СМЕНЫ ФОТО ПРИ НАВЕДЕНИИ --- */
 
+/* --- 13. ЭФФЕКТ СМЕНЫ ФОТО ПРИ НАВЕДЕНИИ (ИСПРАВЛЕННЫЙ) --- */
+
 .product-image-container {
-    position: relative; /* Создаем контекст для позиционирования */
-    margin-bottom: 20px; /* Отступ, который раньше был у .product-image */
+    position: relative; /* ЭТО САМОЕ ВАЖНОЕ! Создаем контекст позиционирования. */
+    display: block; /* Делаем контейнер блочным элементом */
+    width: 100%;
+    /* Задаем соотношение сторон, чтобы контейнер не "схлопывался" */
+    aspect-ratio: 300 / 400; 
+    margin-bottom: 20px;
+    overflow: hidden; /* Прячем все, что может вылезти за пределы */
 }
 
-/* Стили для обоих изображений */
+/* Общие стили для обоих изображений внутри контейнера */
 .product-image-container .product-image {
-    /* Убираем старый отступ, так как он теперь у контейнера */
-    margin-bottom: 0; 
-    /* Плавный переход */
-    transition: opacity 0.4s ease-in-out;
-}
-
-/* Второе фото (при наведении) по умолчанию невидимо */
-.product-image-hover {
-    position: absolute; /* Накладываем его поверх первого */
+    position: absolute; /* Теперь ОБА фото позиционируются абсолютно */
     top: 0;
     left: 0;
-    opacity: 0; /* Делаем его полностью прозрачным */
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Заполняют контейнер, сохраняя пропорции */
+    margin-bottom: 0; /* Убираем старый отступ */
+    transition: opacity 0.4s ease-in-out; /* Плавный переход */
 }
 
-/* Магия происходит здесь! */
+/* Второе фото по умолчанию невидимо */
+.product-image-container .product-image-hover {
+    opacity: 0;
+}
+
+/* При наведении на ВСЮ карточку: */
 .product-card:hover .product-image-hover {
-    /* Когда мы наводим на ВСЮ карточку, второе фото становится видимым */
-    opacity: 1; 
+    opacity: 1; /* Второе фото становится видимым */
 }
 
 .product-card:hover .product-image-primary {
-    /* А первое фото, наоборот, становится невидимым */
-    opacity: 0;
+    opacity: 0; /* Первое фото исчезает */
 }
 /* --- 14. ГАЛЕРЕЯ НА СТРАНИЦЕ ТОВАРА --- */
 
@@ -637,18 +643,24 @@ a {
 }
 
 
-/* --- Магия CSS для переключения слайдов --- */
+/* --- ИСПРАВЛЕННАЯ Магия CSS для переключения слайдов --- */
 
-/* Показываем первую картинку по умолчанию */
+/* Показываем первое фото, ТОЛЬКО если ни одно другое не выбрано */
 .gallery-main-view .gallery-image-wrapper:first-child {
     opacity: 1;
     visibility: visible;
     z-index: 2;
 }
 
-/* Когда цель URL совпадает с ID картинки, мы ее показываем */
+/* Когда мы кликаем по миниатюре (появляется :target) */
 .gallery-main-view .gallery-image-wrapper:target {
-    opacity: 1;
+    opacity: 1; /* Показываем выбранное фото */
     visibility: visible;
-    z-index: 3; /* Ставим z-index выше, чтобы она была поверх всех */
+    z-index: 3; /* Ставим его поверх всех */
+}
+
+/* А здесь самое главное: прячем первое фото, если выбрано ЛЮБОЕ другое */
+.gallery-main-view:has(.gallery-image-wrapper:target) .gallery-image-wrapper:first-child {
+    opacity: 0;
+    visibility: hidden;
 }
