@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 name: productCard.dataset.name,
                 price: parseFloat(productCard.dataset.price),
                 image: imageUrl,
-                url: productCard.dataset.url
+                // ИСПРАВЛЕНО: Добавлен запасной URL
+                url: productCard.dataset.url || 'product.html'
             };
 
             const cartItemId = `${product.id}_${selectedSize}`;
@@ -132,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (item.quantity > 1) {
                             item.quantity--;
                         } else {
-                            cart = cart.filter(item => item.cartId !== cartId);
+                            cart = cart.filter(i => i.cartId !== cartId);
                         }
                     }
                 }
