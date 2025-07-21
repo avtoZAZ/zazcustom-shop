@@ -482,3 +482,54 @@ a {
         grid-template-columns: 1fr;
     }
 }
+/* --- 10. СТРАНИЦА "О НАС" --- */
+.about-content {
+    display: grid;
+    /* Две колонки: левая чуть меньше правой */
+    grid-template-columns: 0.8fr 1.2fr; 
+    gap: 50px;
+    align-items: center;
+}
+
+.about-image-wrapper {
+    /* Добавляем эффект рамки */
+    border: 1px solid var(--border-color);
+    padding: 15px;
+}
+
+.about-image {
+    width: 100%;
+    height: auto;
+    display: block; /* Убирает лишний отступ под картинкой */
+}
+
+.about-text h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: var(--accent-color);
+    letter-spacing: 1px;
+}
+
+.about-text p {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 25px;
+    color: #ccc; /* Чуть более светлый текст для читабельности */
+}
+
+.about-text .btn {
+    margin-top: 20px;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 992px) {
+    .about-content {
+        /* На планшетах и телефонах делаем одну колонку */
+        grid-template-columns: 1fr; 
+    }
+    .about-image-wrapper {
+        /* Картинка будет перед текстом */
+        margin-bottom: 40px; 
+    }
+}
