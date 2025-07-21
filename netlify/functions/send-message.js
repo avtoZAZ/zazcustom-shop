@@ -1,22 +1,15 @@
-// Возвращаем старый, простой способ подключения для node-fetch@2
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
-    // Проверяем, что запрос не пустой
+    // Проверка метода и наличия тела запроса
     if (event.httpMethod !== 'POST' || !event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: "Некоректний запит." })
-        };
+        return { statusCode: 400, body: JSON.stringify({ message: "Некоректний запит." }) };
     }
     
-    // Проверяем наличие переменных окружения
+    // Проверка наличия переменных окружения
     if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID || !process.env.TURNSTILE_SECRET_KEY) {
         console.error("Помилка конфігурації: відсутні змінні оточення.");
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: "Помилка конфігурації сервера." })
-        };
+        return { statusCode: 500, body: JSON.stringify({ message: "Помилка конфігурації сервера." }) };
     }
 
     const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -26,24 +19,26 @@ exports.handler = async (event) => {
     try {
         const data = JSON.parse(event.body);
         const { name, email, message, captchaToken } = data;
-        
-        let formData = new URLSearchParams();
-        formData.append('secret', TURNSTILE_SECRET_KEY);
-        formData.append('response', captchaToken);
+
+        // --- ИСПРАВЛЕННЫЙ БЛОК ПРОВЕРКИ CAPTCHA ---
+        const captchaBody = `secret=${encodeURIComponent(TURNSTILE_SECRET_KEY)}&response=${encodeURIComponent(captchaToken)}`;
 
         const captchaResponse = await fetch('https://challenges.cloudflare.com/turnstile/v1/siteverify', {
             method: 'POST',
-            body: formData,
+            body: captchaBody,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
         });
         
         const captchaData = await captchaResponse.json();
+        // --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
 
         if (!captchaData.success) {
-            // В лог можно добавить детали ошибки от Cloudflare
             console.error("Captcha verification failed:", captchaData['error-codes']);
             return {
                 statusCode: 403,
-                body: JSON.stringify({ message: 'Перевірка CAPTCHA не пройдена.' })
+                body: JSON.stringify({ message: `Перевірка CAPTCHA не пройдена: ${captchaData['error-codes'].join(', ')}` })
             };
         }
         
