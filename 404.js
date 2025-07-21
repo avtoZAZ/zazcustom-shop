@@ -1,9 +1,18 @@
+// Этот код не будет работать из-за устаревшего API,
+// но эффект шума мы уже создали с помощью CSS (SVG).
+// Оставим этот файл на случай, если вы захотите добавить другую JS-анимацию.
+// Для текущего дизайна он не обязателен, но лучше его подключить,
+// так как мы уже прописали его в HTML.
+
+console.log("404 page script loaded.");
+
+// Старый код с canvas не нужен, так как эффект уже достигнут через CSS.
+// Если раскомментировать, он может вызвать ошибки в консоли.
+/*
 var canvas = document.getElementById('canvas'),
-    context = canvas.getContext('2d'),
+    context = canvas.getContext('d'),
     height = canvas.height = 256,
-    width = canvas.width = height,
-    bcontext = 'getCSSCanvasContext' in document ? document.getCSSCanvasContext('2d', 'noise', width, height) : context;
-noise();
+    width = canvas.width = height;
 
 function noise() {
     requestAnimationFrame(noise);
@@ -12,5 +21,8 @@ function noise() {
         idata.data[i] = idata.data[i + 1] = idata.data[i + 2] = Math.floor(Math.random() * 255);
         idata.data[i + 3] = 255;
     }
-    bcontext.putImageData(idata, 0, 0);
+    context.putImageData(idata, 0, 0);
 }
+
+noise();
+*/
