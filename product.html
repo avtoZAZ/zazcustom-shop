@@ -29,9 +29,33 @@
     <main class="product-page-main">
         <div class="container">
             <div class="product-details-grid">
-                <div class="product-gallery">
-                    <img src="/img/fut1.png" alt="Футболка DNIPPROGES" class="main-product-image">
-                </div>
+              <!-- НОВАЯ ГАЛЕРЕЯ ТОВАРА -->
+<div class="product-gallery">
+
+    <!-- Секция с основным изображением -->
+    <div class="gallery-main-view">
+        <div id="img-1" class="gallery-image-wrapper">
+            <img src="/img/fut1-front.png" alt="Вид спереди" class="main-product-image">
+        </div>
+        <div id="img-2" class="gallery-image-wrapper">
+            <img src="/img/fut1-back.png" alt="Вид сзади" class="main-product-image">
+        </div>
+    
+    </div>
+    
+    <!-- Секция с миниатюрами (thumbnails) -->
+    <div class="gallery-thumbnails">
+        <a href="#img-1" class="thumbnail-link">
+            <img src="/img/fut1-front.png" alt="Миниатюра 1" class="thumbnail-image">
+        </a>
+        <a href="#img-2" class="thumbnail-link">
+            <img src="/img/fut1-back.png" alt="Миниатюра 2" class="thumbnail-image">
+        </a>
+        
+    </div>
+
+</div>
+<!-- КОНЕЦ НОВОЙ ГАЛЕРЕИ -->
                 <div class="product-info" data-id="p1" data-name="Футболка DNIPPROGES" data-price="990">
     <h1 class="product-page-title">Футболка DNIPPROGES</h1>
     <p class="product-page-price">990 грн</p>

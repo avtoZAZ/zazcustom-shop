@@ -36,10 +36,16 @@
                 <button class="filter-btn">Худі</button>
                 <button class="filter-btn">Аксесуари</button>
             </div>
-<!-- Оборачиваем в div, чтобы было проще найти родителя -->
 <div class="product-card" data-id="p1" data-name="Футболка DNIPPROGES" data-price="990">
     <a href="product.html" class="product-card-link">
-        <img src="/img/fut1.png" alt="Футболка DNIPPROGES" class="product-image">
+        <!-- НОВЫЙ БЛОК ДЛЯ ИЗОБРАЖЕНИЙ -->
+        <div class="product-image-container">
+            <!-- Основное фото (первое) -->
+            <img src="/img/fut1-front.png" alt="Футболка DNIPPROGES - вид спереди" class="product-image product-image-primary">
+            <!-- Второе фото (которое появится при наведении) -->
+            <img src="/img/fut1-back.png" alt="Футболка DNIPPROGES - вид сзади" class="product-image product-image-hover">
+        </div>
+        
         <h3 class="product-title">Футболка DNIPPROGES</h3>
         <p class="product-price">990 грн</p>
     </a>
