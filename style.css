@@ -533,34 +533,27 @@ a {
         margin-bottom: 40px; 
     }
 }
-/* --- 13. ЭФФЕКТ СМЕНЫ ФОТО ПРИ НАВЕДЕНИИ --- */
-
-/* --- 13. ЭФФЕКТ СМЕНЫ ФОТО ПРИ НАВЕДЕНИИ (ИСПРАВЛЕННЫЙ) --- */
+/* --- 13. ЭФФЕКТ СМЕНЫ ФОТО ПРИ НАВЕДЕНИИ (ФИНАЛЬНАЯ ВЕРСИЯ) --- */
 
 .product-image-container {
-    position: relative; /* ЭТО САМОЕ ВАЖНОЕ! Создаем контекст позиционирования. */
-    display: block; /* Делаем контейнер блочным элементом */
-    width: 100%;
-    /* Задаем соотношение сторон, чтобы контейнер не "схлопывался" */
-    aspect-ratio: 300 / 400; 
+    position: relative; /* <<<<<< ВОТ ЭТА СТРОКА САМАЯ ВАЖНАЯ */
     margin-bottom: 20px;
-    overflow: hidden; /* Прячем все, что может вылезти за пределы */
 }
 
-/* Общие стили для обоих изображений внутри контейнера */
+/* Общие стили для обоих изображений */
 .product-image-container .product-image {
-    position: absolute; /* Теперь ОБА фото позиционируются абсолютно */
+    display: block; /* Убирает лишние отступы */
+    width: 100%;
+    height: auto;
+    margin-bottom: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+/* Второе фото по умолчанию невидимо и находится поверх первого */
+.product-image-hover {
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Заполняют контейнер, сохраняя пропорции */
-    margin-bottom: 0; /* Убираем старый отступ */
-    transition: opacity 0.4s ease-in-out; /* Плавный переход */
-}
-
-/* Второе фото по умолчанию невидимо */
-.product-image-container .product-image-hover {
     opacity: 0;
 }
 
@@ -569,29 +562,24 @@ a {
     opacity: 1; /* Второе фото становится видимым */
 }
 
-.product-card:hover .product-image-primary {
-    opacity: 0; /* Первое фото исчезает */
-}
-/* --- 14. ГАЛЕРЕЯ НА СТРАНИЦЕ ТОВАРА --- */
+/* Первое фото НЕ трогаем, второе просто ляжет поверх него */
 
-/* Контейнер всей галереи */
+/* --- 14. ГАЛЕРЕЯ НА СТРАНИЦЕ ТОВАРА (ФИНАЛЬНАЯ ВЕРСИЯ) --- */
+
 .product-gallery {
     display: flex;
     flex-direction: column;
 }
 
-/* Контейнер для основного большого изображения */
 .gallery-main-view {
     position: relative;
     width: 100%;
-    /* Задаем соотношение сторон, чтобы блок не "прыгал" */
     aspect-ratio: 1 / 1.2; 
-    overflow: hidden; /* Прячем все картинки, которые не должны быть видны */
+    overflow: hidden;
     border: 1px solid var(--border-color);
     margin-bottom: 15px;
 }
 
-/* Обертка для каждой большой картинки */
 .gallery-image-wrapper {
     position: absolute;
     top: 0;
@@ -599,43 +587,33 @@ a {
     width: 100%;
     height: 100%;
     
-    /* Анимация появления/исчезновения */
+    /* Все слайды по умолчанию ПОЛНОСТЬЮ невидимы */
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    
-    /* По умолчанию все картинки спрятаны */
-    z-index: 1; 
+    transition: opacity 0.4s ease;
+    /* Убираем z-index, чтобы не усложнять */
 }
 
-/* Стиль для самой большой картинки */
 .main-product-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Масштабирует картинку, чтобы она заполнила блок */
+    object-fit: cover;
 }
 
-/* Контейнер для миниатюр */
+/* Контейнер для миниатюр (без изменений) */
 .gallery-thumbnails {
     display: flex;
     gap: 15px;
-    justify-content: flex-start; /* Выравнивание миниатюр по левому краю */
 }
-
-/* Ссылка-обертка для миниатюры */
 .thumbnail-link {
     display: block;
-    width: 80px; /* Ширина миниатюры */
-    height: 96px; /* Высота миниатюры (пропорционально) */
+    width: 80px;
+    height: 96px;
     border: 2px solid var(--border-color);
     transition: border-color 0.2s ease;
 }
-
 .thumbnail-link:hover {
     border-color: var(--accent-color);
 }
-
-/* Стиль для картинки-миниатюры */
 .thumbnail-image {
     width: 100%;
     height: 100%;
@@ -643,24 +621,19 @@ a {
 }
 
 
-/* --- ИСПРАВЛЕННАЯ Магия CSS для переключения слайдов --- */
+/* --- "Пуленепробиваемая" магия CSS для переключения --- */
 
-/* Показываем первое фото, ТОЛЬКО если ни одно другое не выбрано */
+/* Показываем ПЕРВЫЙ слайд, если НИЧЕГО не выбрано */
 .gallery-main-view .gallery-image-wrapper:first-child {
     opacity: 1;
-    visibility: visible;
-    z-index: 2;
 }
 
-/* Когда мы кликаем по миниатюре (появляется :target) */
+/* Показываем ВЫБРАННЫЙ слайд */
 .gallery-main-view .gallery-image-wrapper:target {
-    opacity: 1; /* Показываем выбранное фото */
-    visibility: visible;
-    z-index: 3; /* Ставим его поверх всех */
+    opacity: 1;
 }
 
-/* А здесь самое главное: прячем первое фото, если выбрано ЛЮБОЕ другое */
-.gallery-main-view:has(.gallery-image-wrapper:target) .gallery-image-wrapper:first-child {
+/* Прячем ПЕРВЫЙ слайд, если выбран ЛЮБОЙ другой (кроме него самого) */
+.gallery-main-view .gallery-image-wrapper:not(:first-child):target ~ .gallery-image-wrapper:first-child {
     opacity: 0;
-    visibility: hidden;
 }
