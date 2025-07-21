@@ -533,38 +533,48 @@ a {
         margin-bottom: 40px; 
     }
 }
-/* --- 13. ЭФФЕКТ СМЕНЫ ФОТО ПРИ НАВЕДЕНИИ (ФИНАЛЬНАЯ ВЕРСИЯ) --- */
+/* =================================================================== */
+/* 13. ЭФФЕКТ СМЕНЫ ФОТО В КАТАЛОГЕ (НАДЕЖНАЯ ВЕРСИЯ) */
+/* =================================================================== */
 
 .product-image-container {
-    position: relative; /* <<<<<< ВОТ ЭТА СТРОКА САМАЯ ВАЖНАЯ */
+    position: relative; /* Обязательно для позиционирования дочерних элементов */
+    display: block;
+    width: 100%;
+    aspect-ratio: 300 / 400; /* Сохраняем пропорции контейнера */
     margin-bottom: 20px;
 }
 
-/* Общие стили для обоих изображений */
 .product-image-container .product-image {
-    display: block; /* Убирает лишние отступы */
-    width: 100%;
-    height: auto;
-    margin-bottom: 0;
-    transition: opacity 0.4s ease-in-out;
-}
-
-/* Второе фото по умолчанию невидимо и находится поверх первого */
-.product-image-hover {
+    /* Все картинки в контейнере занимают одно и то же место */
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    
+    /* Плавный переход */
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Второе фото по умолчанию полностью прозрачно */
+.product-image-container .product-image-hover {
     opacity: 0;
 }
 
-/* При наведении на ВСЮ карточку: */
+/* При наведении на карточку: */
 .product-card:hover .product-image-hover {
-    opacity: 1; /* Второе фото становится видимым */
+    opacity: 1; /* Показываем второе фото */
+}
+.product-card:hover .product-image-primary {
+    opacity: 0; /* Прячем первое фото */
 }
 
-/* Первое фото НЕ трогаем, второе просто ляжет поверх него */
 
-/* --- 14. ГАЛЕРЕЯ НА СТРАНИЦЕ ТОВАРА (ФИНАЛЬНАЯ ВЕРСИЯ) --- */
+/* =================================================================== */
+/* 14. ГАЛЕРЕЯ НА СТРАНИЦЕ ТОВАРА (НАДЕЖНАЯ ВЕРСИЯ) */
+/* =================================================================== */
 
 .product-gallery {
     display: flex;
@@ -575,22 +585,21 @@ a {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1.2; 
-    overflow: hidden;
     border: 1px solid var(--border-color);
     margin-bottom: 15px;
 }
 
 .gallery-image-wrapper {
+    /* Все большие фото занимают одно и то же место */
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     
-    /* Все слайды по умолчанию ПОЛНОСТЬЮ невидимы */
+    /* Все фото по умолчанию невидимы */
     opacity: 0;
-    transition: opacity 0.4s ease;
-    /* Убираем z-index, чтобы не усложнять */
+    transition: opacity 0.3s ease;
 }
 
 .main-product-image {
@@ -599,7 +608,7 @@ a {
     object-fit: cover;
 }
 
-/* Контейнер для миниатюр (без изменений) */
+/* Миниатюры (без изменений) */
 .gallery-thumbnails {
     display: flex;
     gap: 15px;
@@ -609,10 +618,6 @@ a {
     width: 80px;
     height: 96px;
     border: 2px solid var(--border-color);
-    transition: border-color 0.2s ease;
-}
-.thumbnail-link:hover {
-    border-color: var(--accent-color);
 }
 .thumbnail-image {
     width: 100%;
@@ -620,20 +625,29 @@ a {
     object-fit: cover;
 }
 
+/* --- САМАЯ ПРОСТАЯ И НАДЕЖНАЯ ЛОГИКА ПЕРЕКЛЮЧЕНИЯ --- */
 
-/* --- "Пуленепробиваемая" магия CSS для переключения --- */
-
-/* Показываем ПЕРВЫЙ слайд, если НИЧЕГО не выбрано */
-.gallery-main-view .gallery-image-wrapper:first-child {
+/* 1. Показываем ПЕРВОЕ фото по умолчанию */
+.gallery-image-wrapper:first-child {
     opacity: 1;
 }
 
-/* Показываем ВЫБРАННЫЙ слайд */
-.gallery-main-view .gallery-image-wrapper:target {
+/* 2. Когда ЛЮБОЕ фото становится целью (:target), мы его показываем */
+.gallery-image-wrapper:target {
     opacity: 1;
 }
 
-/* Прячем ПЕРВЫЙ слайд, если выбран ЛЮБОЙ другой (кроме него самого) */
-.gallery-main-view .gallery-image-wrapper:not(:first-child):target ~ .gallery-image-wrapper:first-child {
+/* 3. И ОДНОВРЕМЕННО прячем ПЕРВОЕ фото, если цель - НЕ оно */
+.gallery-main-view:has(.gallery-image-wrapper:target:not(:first-child)) .gallery-image-wrapper:first-child {
     opacity: 0;
+}
+
+/* 4. Также прячем ЛЮБОЕ другое фото (которое не является целью), если выбрана цель */
+.gallery-image-wrapper:not(:target) {
+    opacity: 0;
+}
+
+/* 5. Исключение: если НИЧЕГО не выбрано, первое фото должно остаться видимым */
+.gallery-main-view:not(:has(:target)) .gallery-image-wrapper:first-child {
+    opacity: 1;
 }
