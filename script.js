@@ -22,29 +22,38 @@ document.addEventListener('DOMContentLoaded', () => {
             const productCard = event.target.closest('[data-id]');
             if (!productCard) return;
 
-            let selectedSize = 'M'; // Размер по умолчанию
+            let selectedSize = 'M'; // По умолчанию всегда "M"
             const sizeSelector = productCard.querySelector('.size-selector .active');
             
             if (sizeSelector) {
                 selectedSize = sizeSelector.textContent;
             } else {
-                // Если мы на странице товара, но размер не выбран, берем первый доступный
                 const firstSizeButton = productCard.querySelector('.size-selector .size-btn');
                 if (firstSizeButton) {
                     selectedSize = firstSizeButton.textContent;
                 }
             }
-            
-            // Для товаров без кнопок выбора размера (например, аксессуары в каталоге)
-            if (!productCard.querySelector('.size-selector')) {
-                selectedSize = 'One Size';
+            // ИЗМЕНЕНИЕ: Мы больше не проверяем на "One Size", по умолчанию всегда будет "M", если нет выбора.
+
+            // --- ИСПРАВЛЕНИЕ: БОЛЕЕ НАДЕЖНЫЙ ПОИСК КАРТИНКИ ---
+            let imageUrl = '';
+            // Сначала ищем в контейнере с двумя фото (для каталога)
+            const imageInContainer = productCard.querySelector('.product-image-container .product-image-primary');
+            if (imageInContainer) {
+                imageUrl = imageInContainer.src;
+            } else {
+                // Если не нашли, ищем на странице товара или в простой карточке
+                const mainImage = productCard.querySelector('.main-product-image') || productCard.querySelector('.product-image');
+                if (mainImage) {
+                    imageUrl = mainImage.src;
+                }
             }
 
             const product = {
                 id: productCard.dataset.id,
                 name: productCard.dataset.name,
                 price: parseFloat(productCard.dataset.price),
-                image: productCard.querySelector('.product-image-primary')?.src || productCard.querySelector('.main-product-image')?.src || productCard.querySelector('.product-image')?.src
+                image: imageUrl
             };
 
             const cartItemId = `${product.id}_${selectedSize}`;
@@ -198,32 +207,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        renderCart(); // Первая отрисовка корзины
+        renderCart();
     }
     
     // --- 4. ЛОГИКА ДЛЯ СТРАНИЦЫ ТОВАРА (ВЫБОР РАЗМЕРА) ---
-    // Ищем контейнер с кнопками выбора размера
     const sizeSelectorContainer = document.querySelector('.product-info .size-selector');
-
-    // Этот код сработает, ТОЛЬКО если мы на странице товара и нашли этот контейнер
     if (sizeSelectorContainer) {
         sizeSelectorContainer.addEventListener('click', (e) => {
-            // Проверяем, что кликнули именно по кнопке размера
             if (e.target.classList.contains('size-btn')) {
-                // Убираем 'active' у всех кнопок-соседей
                 sizeSelectorContainer.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
-                // Добавляем 'active' только той, на которую кликнули
                 e.target.classList.add('active');
             }
         });
     }
 
     // --- 5. ЛОГИКА ДЛЯ СТРАНИЦЫ КОНТАКТОВ (СТАТИЧЕСКАЯ КАПЧА) ---
-    // (Этот блок остался из предыдущей версии, он не мешает и работает для страницы контактов)
     const captchaLabel = document.getElementById('captcha-label');
     const contactForm = document.getElementById('contact-form');
     if (captchaLabel && contactForm) {
-        // ... (здесь весь код для статической капчи, он не изменился)
+        // ... (код для статической капчи, который уже работает)
     }
 
     // --- ОБЩАЯ ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ЛЮБОЙ СТРАНИЦЫ ---
