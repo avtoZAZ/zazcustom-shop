@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const productCard = event.target.closest('[data-id]');
             if (!productCard) return;
 
-            let selectedSize = 'M'; // По умолчанию всегда "M"
+            let selectedSize = 'M';
             const sizeSelector = productCard.querySelector('.size-selector .active');
             
             if (sizeSelector) {
@@ -33,16 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectedSize = firstSizeButton.textContent;
                 }
             }
-            // ИЗМЕНЕНИЕ: Мы больше не проверяем на "One Size", по умолчанию всегда будет "M", если нет выбора.
 
-            // --- ИСПРАВЛЕНИЕ: БОЛЕЕ НАДЕЖНЫЙ ПОИСК КАРТИНКИ ---
             let imageUrl = '';
-            // Сначала ищем в контейнере с двумя фото (для каталога)
             const imageInContainer = productCard.querySelector('.product-image-container .product-image-primary');
             if (imageInContainer) {
                 imageUrl = imageInContainer.src;
             } else {
-                // Если не нашли, ищем на странице товара или в простой карточке
                 const mainImage = productCard.querySelector('.main-product-image') || productCard.querySelector('.product-image');
                 if (mainImage) {
                     imageUrl = mainImage.src;
@@ -53,7 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: productCard.dataset.id,
                 name: productCard.dataset.name,
                 price: parseFloat(productCard.dataset.price),
-                image: imageUrl
+                image: imageUrl,
+                url: productCard.dataset.url
             };
 
             const cartItemId = `${product.id}_${selectedSize}`;
@@ -86,22 +83,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 emptyCartMessage.style.display = 'block';
                 return;
             }
-
             cartSummary.style.display = 'block';
             emptyCartMessage.style.display = 'none';
-            
             let totalPrice = 0;
-
             cart.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 totalPrice += itemTotal;
-
                 const cartItemEl = document.createElement('div');
                 cartItemEl.className = 'cart-item';
                 cartItemEl.innerHTML = `
-                    <img src="${item.image || 'https://via.placeholder.com/100x120/1a1a1a/e0e0e0?text=ZAZ'}" alt="${item.name}" class="cart-item-image">
+                    <a href="${item.url}" class="cart-item-link">
+                        <img src="${item.image || 'https://via.placeholder.com/100x120/1a1a1a/e0e0e0?text=ZAZ'}" alt="${item.name}" class="cart-item-image">
+                    </a>
                     <div class="cart-item-info">
-                        <h3 class="cart-item-title">${item.name}</h3>
+                        <a href="${item.url}" class="cart-item-link">
+                            <h3 class="cart-item-title">${item.name}</h3>
+                        </a>
                         <p class="cart-item-size">Розмір: ${item.size}</p>
                         <p class="cart-item-price">${item.price} грн</p>
                     </div>
@@ -115,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 cartItemsContainer.appendChild(cartItemEl);
             });
-
             cartTotalPriceEl.textContent = totalPrice;
         }
 
@@ -123,11 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = event.target;
             const cartId = target.dataset.cartId;
             if (!cartId) return;
-
             if (target.classList.contains('cart-item-remove')) {
                 cart = cart.filter(item => item.cartId !== cartId);
             }
-
             if (target.classList.contains('quantity-btn')) {
                 const item = cart.find(item => item.cartId === cartId);
                 const action = target.dataset.action;
@@ -222,10 +216,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 5. ЛОГИКА ДЛЯ СТРАНИЦЫ КОНТАКТОВ (СТАТИЧЕСКАЯ КАПЧА) ---
-    const captchaLabel = document.getElementById('captcha-label');
     const contactForm = document.getElementById('contact-form');
-    if (captchaLabel && contactForm) {
-        // ... (код для статической капчи, который уже работает)
+    if (contactForm) {
+        const captchaLabel = document.getElementById('captcha-label');
+        const statusMessage = document.getElementById('form-status');
+        const submitButton = document.getElementById('submit-btn');
+
+        function generateCaptcha() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            if (captchaLabel) {
+                captchaLabel.textContent = `Перевірка: Скільки буде ${num1} + ${num2}?`;
+            }
+        }
+        generateCaptcha();
+
+        contactForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(contactForm);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const message = formData.get('message');
+            const captchaQuestion = captchaLabel.textContent;
+            const captchaAnswer = formData.get('captcha');
+
+            submitButton.disabled = true;
+            statusMessage.textContent = 'Відправка...';
+            statusMessage.style.color = 'var(--text-color)';
+
+            try {
+                const response = await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, message, captchaQuestion, captchaAnswer, type: 'contact' }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusMessage.textContent = 'Повідомлення успішно відправлено!';
+                    statusMessage.style.color = 'lightgreen';
+                    contactForm.reset();
+                    generateCaptcha();
+                } else {
+                    statusMessage.textContent = `Помилка: ${result.message}`;
+                    statusMessage.style.color = 'red';
+                    generateCaptcha();
+                }
+
+            } catch (error) {
+                console.error('Contact form error:', error);
+                statusMessage.textContent = 'Помилка мережі. Спробуйте пізніше.';
+                statusMessage.style.color = 'red';
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
     }
 
     // --- ОБЩАЯ ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ЛЮБОЙ СТРАНИЦЫ ---
