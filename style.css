@@ -750,3 +750,11 @@ a {
     padding: 0 10px;
     font-weight: 300;
 }
+.product-grid {
+    display: grid;
+    /* Изменяем эту строку */
+    grid-template-columns: repeat(4, 22%); 
+    gap: 30px; /* Можно оставить или изменить */
+    /* Выравниваем всю сетку по центру */
+    justify-content: center; 
+}
