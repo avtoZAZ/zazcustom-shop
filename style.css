@@ -758,3 +758,128 @@ a {
     /* Выравниваем всю сетку по центру */
     justify-content: center; 
 }
+/* =================================================================== */
+/* 16. АДАПТИВНОСТЬ ДЛЯ ВСЕГО ПРОЕКТА */
+/* =================================================================== */
+
+/* --- Планшеты и маленькие ноутбуки (до 992px) --- */
+@media (max-width: 992px) {
+    /* Делаем сетку 2x2 */
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Все двухколоночные макеты становятся одноколоночными */
+    .product-details-grid,
+    .about-content,
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-image-wrapper {
+        margin-bottom: 40px;
+    }
+}
+
+
+/* --- Планшеты и телефоны (до 768px) - прячем меню, показываем бургер --- */
+@media (max-width: 768px) {
+    /* Прячем обычное меню */
+    .nav {
+        display: none;
+    }
+    
+    /* Стили для контейнера действий в шапке */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    /* Показываем и стилизуем иконку бургера */
+    .burger-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+        z-index: 101; /* Поверх всего */
+    }
+    .burger-menu span {
+        display: block;
+        width: 25px;
+        height: 3px;
+        background-color: var(--text-color);
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Стили для выезжающего мобильного меню */
+    .nav.active {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 80%;
+        height: 100%;
+        background-color: var(--bg-color);
+        border-left: 1px solid var(--border-color);
+        padding-top: 100px;
+        align-items: center;
+        gap: 30px;
+        transform: translateX(0);
+        transition: transform 0.3s ease-in-out;
+        z-index: 100;
+    }
+    
+    .nav-link {
+        font-size: 20px;
+    }
+
+    .hero h1 {
+        font-size: 42px;
+    }
+    .page-title {
+        font-size: 36px;
+    }
+}
+
+
+/* --- Только телефоны (до 576px) --- */
+@media (max-width: 576px) {
+    /* Делаем сетку в одну колонку */
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Адаптируем корзину */
+    .cart-item {
+        flex-wrap: wrap; /* Разрешаем перенос элементов */
+        padding: 15px 0;
+    }
+    .cart-item-image {
+        width: 80px;
+        height: 96px;
+    }
+    .cart-item-info {
+        /* Занимает всю ширину за вычетом картинки и отступа */
+        flex-basis: calc(100% - 100px); 
+    }
+    .cart-item-quantity, .cart-item-total-price, .cart-item-remove {
+        /* Переносим контролы под товар */
+        flex-basis: 100%;
+        margin-top: 15px;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+    }
+    .cart-item-remove {
+        justify-content: flex-end; /* Кнопку удаления вправо */
+    }
+
+    .hero {
+        padding: 80px 0;
+    }
+    .hero h1 {
+        font-size: 32px;
+    }
+}
