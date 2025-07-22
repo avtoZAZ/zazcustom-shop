@@ -279,3 +279,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ОБЩАЯ ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ЛЮБОЙ СТРАНИЦЫ ---
     updateCartCounter();
 });
+    // --- 6. ЛОГИКА ФИЛЬТРА В КАТАЛОГЕ ---
+    const filterBar = document.querySelector('.filter-bar');
+    const productCards = document.querySelectorAll('.product-grid .product-card');
+
+    // Этот код сработает, только если на странице есть фильтр
+    if (filterBar && productCards.length > 0) {
+        
+        filterBar.addEventListener('click', (event) => {
+            // Убеждаемся, что кликнули именно по кнопке
+            const targetButton = event.target.closest('.filter-btn');
+            if (!targetButton) return;
+
+            // Убираем класс 'active' у всех кнопок
+            filterBar.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Добавляем класс 'active' только нажатой кнопке
+            targetButton.classList.add('active');
+
+            const filterValue = targetButton.dataset.filter;
+
+            // Проходимся по каждой карточке товара
+            productCards.forEach(card => {
+                const cardCategory = card.dataset.category;
+
+                // Если категория совпадает или выбраны "Все", показываем карточку
+                if (filterValue === 'all' || filterValue === cardCategory) {
+                    card.classList.remove('hidden');
+                } else {
+                    // Иначе - прячем
+                    card.classList.add('hidden');
+                }
+            });
+        });
+    }

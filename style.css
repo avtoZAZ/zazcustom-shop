@@ -883,3 +883,30 @@ a {
         font-size: 32px;
     }
 }
+/* --- 16. СТИЛИ ДЛЯ ФИЛЬТРА КАТАЛОГА --- */
+
+/* Улучшаем вид активной кнопки фильтра */
+.filter-btn.active {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+/* Добавляем плавность для всех карточек */
+.product-card {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Класс, который будет скрывать карточку */
+.product-card.hidden {
+    transform: scale(0.9);
+    opacity: 0;
+    /* Убираем элемент из потока, чтобы он не занимал место */
+    /* Важно: это свойство не анимируется, поэтому мы используем его в связке с opacity */
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    border: none;
+}
