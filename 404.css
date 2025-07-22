@@ -1,12 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=VT323');
 
-$light-grey: #e0e2f4;
-$grey: #aaaaaa;
-$blue: #0414a7;
-
-$base-font-size: 20px;
-$font-stack: 'VT323', monospace;
-
 body,
 h1,
 h2,
@@ -14,32 +7,32 @@ h3,
 h4,
 p,
 a {
-  color: $light-grey;
+  color: #e0e2f4; /* $light-grey */
 }
 
 body,
 p {
-  font: normal #{$base-font-size}/1.25rem $font-stack;
+  font: normal 20px/1.25rem 'VT323', monospace;
 }
 
 h1 {
-  font: normal 2.75rem/1.05em $font-stack;
+  font: normal 2.75rem/1.05em 'VT323', monospace;
 }
 
 h2 {
-  font: normal 2.25rem/1.25em $font-stack;
+  font: normal 2.25rem/1.25em 'VT323', monospace;
 }
 
 h3 {
-  font: lighter 1.5rem/1.25em $font-stack;
+  font: lighter 1.5rem/1.25em 'VT323', monospace;
 }
 
 h4 {
-  font: lighter 1.125rem/1.2222222em $font-stack;
+  font: lighter 1.125rem/1.2222222em 'VT323', monospace;
 }
 
 body {
-  background: $blue;
+  background: #0414a7; /* $blue */
 }
 
 .container {
@@ -50,34 +43,34 @@ body {
 
 .bsod {
   padding-top: 10%;
+}
 
-  .neg {
-    text-align: center;
-    color: $blue;
+.bsod .neg {
+  text-align: center;
+  color: #0414a7; /* $blue */
+}
 
-    .bg {
-      background: $grey;
-      padding: 0 15px 2px 13px;
-    }
-  }
+.bsod .neg .bg {
+  background: #aaaaaa; /* $grey */
+  padding: 0 15px 2px 13px;
+}
 
-  .title {
-    margin-bottom: 50px;
-  }
+.bsod .title {
+  margin-bottom: 50px;
+}
 
-  .nav {
-    margin-top: 35px;
-    text-align: center;
+.bsod .nav {
+  margin-top: 35px;
+  text-align: center;
+}
 
-    .link {
-      text-decoration: none;
-      padding: 0 9px 2px 8px;
+.bsod .nav .link {
+  text-decoration: none;
+  padding: 0 9px 2px 8px;
+}
 
-      &:hover,
-      &:focus {
-        background: $grey;
-        color: $blue;
-      }
-    }
-  }
+.bsod .nav .link:hover,
+.bsod .nav .link:focus {
+  background: #aaaaaa; /* $grey */
+  color: #0414a7; /* $blue */
 }
