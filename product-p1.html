@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Каталог - ZAZcustom</title>
+    <title>Футболка DNIPPROGES - ZAZcustom</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,28 +36,57 @@
     </div>
 </header>
 
-<main>
+<main class="product-page-main">
     <div class="container">
-        <h1 class="page-title">Каталог товарів</h1>
+        <div class="product-details-grid" data-id="p1" data-name="Футболка DNIPPROGES" data-price="990" data-url="product-p1.html">
 
-        <div class="catalog-controls">
-            <input type="text" class="catalog-search" id="catalog-search" placeholder="Пошук товарів...">
-            <select class="catalog-sort" id="catalog-sort">
-                <option value="default">За замовчуванням</option>
-                <option value="price-asc">Ціна: від дешевих</option>
-                <option value="price-desc">Ціна: від дорогих</option>
-                <option value="name-asc">Назва: А-Я</option>
-            </select>
+            <!-- Ліва колонка: Галерея -->
+            <div class="product-gallery">
+                <div class="gallery-main-view">
+                    <div class="gallery-image-wrapper">
+                        <img src="/img/fut1-front.png" alt="Футболка DNIPPROGES - вид спереду" class="main-product-image">
+                    </div>
+                    <div class="gallery-image-wrapper">
+                        <img src="/img/fut1-back.png" alt="Футболка DNIPPROGES - вид ззаду" class="main-product-image">
+                    </div>
+                </div>
+
+                <div class="gallery-thumbnails">
+                    <button class="thumbnail-btn" data-index="0">
+                        <img src="/img/fut1-front.png" alt="Мініатюра 1" class="thumbnail-image">
+                    </button>
+                    <button class="thumbnail-btn" data-index="1">
+                        <img src="/img/fut1-back.png" alt="Мініатюра 2" class="thumbnail-image">
+                    </button>
+                </div>
+            </div>
+
+            <!-- Права колонка: Інформація про товар -->
+            <div class="product-info">
+                <h1 class="product-page-title">Футболка DNIPPROGES</h1>
+                <p class="product-page-price">990 грн</p>
+
+                <div class="selector">
+                    <p class="selector-label">Оберіть розмір:</p>
+                    <div class="size-selector">
+                        <button class="size-btn active">S</button>
+                        <button class="size-btn">M</button>
+                        <button class="size-btn">L</button>
+                        <button class="size-btn">XL</button>
+                        <button class="size-btn">XXL</button>
+                    </div>
+                </div>
+
+                <button class="btn-buy-lg">Додати в корзину</button>
+
+                <div class="product-description">
+                    <h3>Опис товару</h3>
+                    <p>Унікальна футболка з авторським принтом "DNIPPROGES". Виконана з високоякісної 100% бавовни, що забезпечує комфорт та довговічність. Прямий крій, укріплений воріт.</p>
+                    <p><strong>Склад:</strong> 100% бавовна.</p>
+                    <p><strong>Догляд:</strong> прання при 30°C, принт не прасувати.</p>
+                </div>
+            </div>
         </div>
-
-        <div class="filter-bar">
-            <button class="filter-btn active" data-filter="all">Усі</button>
-            <button class="filter-btn" data-filter="tshirt">Футболки</button>
-            <button class="filter-btn" data-filter="hoodie">Худі</button>
-            <button class="filter-btn" data-filter="accessory">Аксесуари</button>
-        </div>
-
-        <div class="product-grid" id="catalog-products"></div>
     </div>
 </main>
 
@@ -84,7 +113,6 @@
         </div>
         <div class="footer-bottom">
             <p>© 2025 ZAZcustom. Усі права захищені.</p>
-            <a href="admin.html" class="footer-admin-link">адмін</a>
         </div>
     </div>
 </footer>

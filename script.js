@@ -1,3 +1,50 @@
+// --- ЗАВАНТАЖЕННЯ ТОВАРІВ ---
+async function loadProducts() {
+    // Спочатку перевіряємо localStorage (дані з адмінки)
+    const localData = localStorage.getItem('zazcustom_products');
+    if (localData) {
+        try {
+            const products = JSON.parse(localData);
+            return products.filter(p => p.active !== false);
+        } catch(e) {}
+    }
+    // Fallback — products.json
+    try {
+        const response = await fetch('/products.json');
+        return (await response.json()).filter(p => p.active !== false);
+    } catch (error) {
+        console.error('Помилка завантаження товарів:', error);
+        return [];
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function renderProductCard(product) {
+    const images = product.images || [];
+    return `
+        <div class="product-card fade-up" data-id="${escapeHtml(product.id)}" data-name="${escapeHtml(product.name)}" data-category="${escapeHtml(product.category)}" data-price="${escapeHtml(String(product.price))}" data-url="${escapeHtml(product.url)}">
+            <a href="${escapeHtml(product.url)}" class="product-card-link">
+                <div class="product-image-container">
+                    <img src="${escapeHtml(images[0] || '')}" alt="${escapeHtml(product.name)} - вид спереду" class="product-image product-image-primary">
+                    ${images[1] ? `<img src="${escapeHtml(images[1])}" alt="${escapeHtml(product.name)} - вид ззаду" class="product-image product-image-hover">` : ''}
+                </div>
+                <h3 class="product-title">${escapeHtml(product.name)}</h3>
+                <p class="product-price">${escapeHtml(String(product.price))} грн</p>
+            </a>
+            <button class="btn-buy">Додати в корзину</button>
+        </div>
+    `;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. TOAST-СПОВІЩЕННЯ ---
@@ -39,62 +86,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 3. ДОДАВАННЯ В КОРЗИНУ ---
-    const addToCartButtons = document.querySelectorAll('.btn-buy, .btn-buy-lg');
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            const productCard = event.target.closest('[data-id]');
-            if (!productCard) return;
+    // --- 3. ДОДАВАННЯ В КОРЗИНУ (делегування подій) ---
+    function handleAddToCart(event) {
+        const button = event.target.closest('.btn-buy, .btn-buy-lg');
+        if (!button) return;
 
-            let selectedSize = 'M';
-            const activeSizeBtn = productCard.querySelector('.size-selector .active');
-            if (activeSizeBtn) {
-                selectedSize = activeSizeBtn.textContent;
-            } else {
-                const firstSizeBtn = productCard.querySelector('.size-selector .size-btn');
-                if (firstSizeBtn) selectedSize = firstSizeBtn.textContent;
-            }
+        const productCard = button.closest('[data-id]');
+        if (!productCard) return;
 
-            let imageUrl = '';
-            const imageInContainer = productCard.querySelector('.product-image-container .product-image-primary');
-            if (imageInContainer) {
-                imageUrl = imageInContainer.src;
-            } else {
-                const mainImage = productCard.querySelector('.main-product-image') || productCard.querySelector('.product-image');
-                if (mainImage) imageUrl = mainImage.src;
-            }
+        let selectedSize = 'M';
+        const activeSizeBtn = productCard.querySelector('.size-selector .active');
+        if (activeSizeBtn) {
+            selectedSize = activeSizeBtn.textContent;
+        } else {
+            const firstSizeBtn = productCard.querySelector('.size-selector .size-btn');
+            if (firstSizeBtn) selectedSize = firstSizeBtn.textContent;
+        }
 
-            const product = {
-                id: productCard.dataset.id,
-                name: productCard.dataset.name,
-                price: parseFloat(productCard.dataset.price),
-                image: imageUrl,
-                url: productCard.dataset.url || 'product.html'
-            };
+        let imageUrl = '';
+        const imageInContainer = productCard.querySelector('.product-image-container .product-image-primary');
+        if (imageInContainer) {
+            imageUrl = imageInContainer.src;
+        } else {
+            const mainImage = productCard.querySelector('.main-product-image') || productCard.querySelector('.product-image');
+            if (mainImage) imageUrl = mainImage.src;
+        }
 
-            const cartItemId = `${product.id}_${selectedSize}`;
-            const existingItem = cart.find(item => item.cartId === cartItemId);
+        const product = {
+            id: productCard.dataset.id,
+            name: productCard.dataset.name,
+            price: parseFloat(productCard.dataset.price),
+            image: imageUrl,
+            url: productCard.dataset.url || 'product.html'
+        };
 
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                cart.push({ ...product, size: selectedSize, quantity: 1, cartId: cartItemId });
-            }
+        const cartItemId = `${product.id}_${selectedSize}`;
+        const existingItem = cart.find(item => item.cartId === cartItemId);
 
-            saveCart();
-            updateCartCounter();
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ ...product, size: selectedSize, quantity: 1, cartId: cartItemId });
+        }
 
-            const badge = document.getElementById('cart-badge');
-            if (badge) {
-                badge.classList.remove('pulse');
-                void badge.offsetWidth;
-                badge.classList.add('pulse');
-                setTimeout(() => badge.classList.remove('pulse'), 600);
-            }
+        saveCart();
+        updateCartCounter();
 
-            showToast(`"${product.name}" (Розмір: ${selectedSize}) додано до корзини!`);
-        });
-    });
+        const badge = document.getElementById('cart-badge');
+        if (badge) {
+            badge.classList.remove('pulse');
+            void badge.offsetWidth;
+            badge.classList.add('pulse');
+            setTimeout(() => badge.classList.remove('pulse'), 600);
+        }
+
+        showToast(`"${product.name}" (Розмір: ${selectedSize}) додано до корзини!`);
+    }
+
+    // Делегування подій на document для статичних і динамічних кнопок
+    document.addEventListener('click', handleAddToCart);
 
     // --- 4. СТОРІНКА КОРЗИНИ ---
     if (document.body.classList.contains('cart-page')) {
@@ -275,13 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const productGrid = document.querySelector('.product-grid');
 
     if (filterBar || catalogSearch || catalogSort) {
-        const productCards = productGrid ? Array.from(productGrid.querySelectorAll('.product-card')) : [];
-
         let currentFilter = 'all';
         let currentSearch = '';
         let currentSort = 'default';
 
         function applyFilters() {
+            const productCards = productGrid ? Array.from(productGrid.querySelectorAll('.product-card')) : [];
             let visible = productCards.filter(card => {
                 const matchCategory = currentFilter === 'all' || card.dataset.category === currentFilter;
                 const cardName = (card.dataset.name || card.querySelector('.product-title')?.textContent || '').toLowerCase();
@@ -448,4 +497,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ІНІЦІАЛІЗАЦІЯ ---
     updateCartCounter();
+
+    // --- 13. ДИНАМІЧНЕ ЗАВАНТАЖЕННЯ ТОВАРІВ ---
+    const featuredGrid = document.getElementById('featured-products');
+    if (featuredGrid) {
+        loadProducts().then(products => {
+            const featured = products.filter(p => p.featured);
+            featuredGrid.innerHTML = featured.map(renderProductCard).join('');
+            // Запускаємо анімації для нових елементів
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+            featuredGrid.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        });
+    }
+
+    const catalogGrid = document.getElementById('catalog-products');
+    if (catalogGrid) {
+        loadProducts().then(products => {
+            catalogGrid.innerHTML = products.map(renderProductCard).join('');
+            // Запускаємо анімації для нових елементів
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+            catalogGrid.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        });
+    }
 });
