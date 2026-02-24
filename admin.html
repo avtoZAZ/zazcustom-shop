@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адмін-панель - ZAZcustom</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Екран входу -->
+<div id="login-screen" style="display:flex; align-items:center; justify-content:center; min-height:100vh;">
+    <div class="admin-login">
+        <h1>ZAZcustom</h1>
+        <p style="color:#888; margin-bottom:30px; font-size:14px;">Адмін-панель</p>
+        <form id="login-form">
+            <input type="password" id="admin-password" placeholder="Введіть пароль" autocomplete="current-password" required>
+            <button type="submit" class="btn">Увійти</button>
+        </form>
+        <p id="login-error" class="admin-error"></p>
+    </div>
+</div>
+
+<!-- Адмін-панель -->
+<div id="admin-screen" style="display:none;">
+
+    <header class="header">
+        <div class="container">
+            <div class="header-inner">
+                <a href="index.html" class="logo">ZAZcustom</a>
+                <div class="admin-actions">
+                    <button class="admin-btn primary" id="export-btn">Експортувати JSON</button>
+                    <button class="admin-btn" id="logout-btn">Вийти</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-panel">
+        <div class="container">
+
+            <!-- Список товарів -->
+            <div id="admin-list-container">
+                <div class="admin-header">
+                    <h1>Управління товарами</h1>
+                    <button class="admin-btn primary" id="add-new-btn">+ Додати новий товар</button>
+                </div>
+                <div class="admin-product-list" id="admin-product-list"></div>
+            </div>
+
+            <!-- Форма додавання / редагування -->
+            <div id="admin-form-container" style="display:none;">
+                <div class="admin-form">
+                    <h2 id="form-title">Додати новий товар</h2>
+
+                    <div class="form-group">
+                        <label for="field-id">ID товару</label>
+                        <input type="text" id="field-id" placeholder="Автогенерація" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field-name">Назва <span style="color:#e74c3c">*</span></label>
+                        <input type="text" id="field-name" placeholder="Назва товару">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field-price">Ціна (грн) <span style="color:#e74c3c">*</span></label>
+                        <input type="number" id="field-price" placeholder="990" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field-category">Категорія</label>
+                        <select id="field-category">
+                            <option value="tshirt">Футболки</option>
+                            <option value="hoodie">Худі</option>
+                            <option value="accessory">Аксесуари</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field-url">URL сторінки товару</label>
+                        <input type="text" id="field-url" placeholder="product-p1.html">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field-description">Опис</label>
+                        <textarea id="field-description" rows="4" placeholder="Опис товару..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field-composition">Склад</label>
+                        <input type="text" id="field-composition" placeholder="100% бавовна">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field-care">Догляд</label>
+                        <input type="text" id="field-care" placeholder="прання при 30°C">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Розміри</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="size-S"> S</label>
+                            <label><input type="checkbox" id="size-M"> M</label>
+                            <label><input type="checkbox" id="size-L"> L</label>
+                            <label><input type="checkbox" id="size-XL"> XL</label>
+                            <label><input type="checkbox" id="size-XXL"> XXL</label>
+                            <label><input type="checkbox" id="size-XXXL"> XXXL</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Фото (URL шляхи)</label>
+                        <div class="image-fields" id="image-fields">
+                            <div class="image-field-row">
+                                <input type="text" placeholder="/img/назва-фото.png">
+                            </div>
+                        </div>
+                        <button type="button" class="admin-btn" id="add-image-btn" style="margin-top:10px;">+ Додати ще фото</button>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="field-featured"> Показувати на головній</label>
+                            <label><input type="checkbox" id="field-active" checked> Активний</label>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-actions">
+                        <button type="button" class="admin-btn primary" id="save-product-btn">Зберегти</button>
+                        <button type="button" class="admin-btn" id="cancel-product-btn">Скасувати</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

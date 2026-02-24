@@ -1202,3 +1202,194 @@ a {
         right: 15px;
     }
 }
+
+/* --- АДМІН-ПАНЕЛЬ --- */
+.admin-login {
+    max-width: 400px;
+    margin: 100px auto;
+    text-align: center;
+    padding: 40px;
+    background: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+}
+.admin-login h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+}
+.admin-login input {
+    width: 100%;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    font-family: var(--font-body);
+}
+.admin-login input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+.admin-login .btn { width: 100%; cursor: pointer; }
+.admin-error { color: #e74c3c; margin-top: 10px; font-size: 14px; }
+
+.admin-panel { padding: 40px 0; }
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+.admin-header h1 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    color: var(--accent-color);
+}
+.admin-actions { display: flex; gap: 15px; }
+
+.admin-product-list { margin-bottom: 40px; }
+.admin-product-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    margin-bottom: 15px;
+    transition: border-color 0.3s;
+    flex-wrap: wrap;
+}
+.admin-product-item:hover { border-color: var(--accent-color); }
+.admin-product-item img {
+    width: 80px;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+.admin-product-info { flex-grow: 1; min-width: 150px; }
+.admin-product-info h3 { font-size: 18px; margin-bottom: 5px; color: #fff; }
+.admin-product-info p { font-size: 14px; color: #888; }
+.admin-product-price { font-size: 18px; font-weight: 700; color: var(--accent-color); min-width: 100px; }
+.admin-product-status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.admin-product-status.active { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+.admin-product-status.inactive { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+.admin-product-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.admin-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font-body);
+    transition: all 0.3s;
+}
+.admin-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+.admin-btn.danger:hover { border-color: #e74c3c; color: #e74c3c; }
+.admin-btn.primary {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--bg-color);
+    font-weight: 700;
+}
+.admin-btn.primary:hover {
+    background: #c49060;
+    border-color: #c49060;
+    color: var(--bg-color);
+}
+
+/* Форма додавання/редагування */
+.admin-form {
+    max-width: 700px;
+    margin: 0 auto;
+    background: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    padding: 40px;
+}
+.admin-form h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: var(--accent-color);
+}
+.admin-form .form-group { margin-bottom: 20px; }
+.admin-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #aaa;
+}
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 12px;
+    font-size: 14px;
+    font-family: var(--font-body);
+}
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+.admin-form .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.admin-form .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 14px;
+}
+.admin-form .checkbox-group input[type="checkbox"] {
+    width: auto;
+    accent-color: var(--accent-color);
+}
+.admin-form .image-fields { display: flex; flex-direction: column; gap: 10px; }
+.admin-form .image-field-row {
+    display: flex;
+    gap: 10px;
+}
+.admin-form .image-field-row input { flex-grow: 1; }
+.admin-form .image-field-row button {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: #e74c3c;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: 18px;
+}
+.admin-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* Посилання на адмінку у футері */
+.footer-admin-link {
+    font-size: 11px;
+    color: #333;
+    margin-top: 8px;
+    display: inline-block;
+    transition: color 0.3s;
+}
+.footer-admin-link:hover { color: #555; }

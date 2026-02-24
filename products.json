@@ -1,0 +1,19 @@
+[
+  {
+    "id": "p1",
+    "name": "Футболка DNIPPROGES",
+    "price": 990,
+    "category": "tshirt",
+    "url": "product-p1.html",
+    "description": "Унікальна футболка з авторським принтом \"DNIPPROGES\". Виконана з високоякісної 100% бавовни, що забезпечує комфорт та довговічність. Прямий крій, укріплений воріт.",
+    "composition": "100% бавовна",
+    "care": "прання при 30°C, принт не прасувати",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "images": [
+      "/img/fut1-front.png",
+      "/img/fut1-back.png"
+    ],
+    "featured": true,
+    "active": true
+  }
+]
