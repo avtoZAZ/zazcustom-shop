@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,66 +7,96 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<!-- Вставьте этот header во ВСЕ ваши HTML файлы -->
+
 <header class="header">
     <div class="container">
         <div class="header-inner">
             <a href="index.html" class="logo">ZAZcustom</a>
-            <nav class="nav">
+            <nav class="nav" id="nav">
                 <a href="index.html" class="nav-link">Головна</a>
                 <a href="catalog.html" class="nav-link">Каталог</a>
                 <a href="about.html" class="nav-link">Про нас</a>
                 <a href="contacts.html" class="nav-link">Контакти</a>
             </nav>
-            <!-- Ссылку на корзину мы пока не делаем, так как для нее нужен JavaScript -->
-            <a href="cart.html" id="cart-link" class="cart-link">Корзина (0)</a>
+            <div class="header-actions">
+                <a href="cart.html" id="cart-link" class="cart-link">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                    <span class="cart-badge" id="cart-badge">0</span>
+                </a>
+                <button class="burger-menu" id="burger-menu" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
         </div>
     </div>
 </header>
-    <main>
-        <section class="hero">
-            <div class="container">
-                <h1>Нова коллекція </h1>
-                
-                <a href="catalog.html" class="btn">Відкрити Каталог</a>
-            </div>
-        </section>
 
-        <section class="catalog">
-            <div class="container">
-                <h2 class="section-title">Популярні товари</h2>
-                <div class="product-grid">
-
-       <div class="product-card" data-id="p1" data-name="Футболка DNIPPROGES" data-category="tshirt" data-price="990" data-url="product.html">
-    <a href="product.html" class="product-card-link">
-        <!-- НОВЫЙ БЛОК ДЛЯ ИЗОБРАЖЕНИЙ -->
-        <div class="product-image-container">
-            <!-- Основное фото (первое) -->
-            <img src="/img/fut1-front.png" alt="Футболка DNIPPROGES - вид спереди" class="product-image product-image-primary">
-            <!-- Второе фото (которое появится при наведении) -->
-            <img src="/img/fut1-back.png" alt="Футболка DNIPPROGES - вид сзади" class="product-image product-image-hover">
-        </div>
-        
-        <h3 class="product-title">Футболка DNIPPROGES</h3>
-        <p class="product-price">990 грн</p>
-    </a>
-    <button class="btn-buy">Додати в корзину</button>
-</div>
-                  
-
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer">
+<main>
+    <section class="hero">
         <div class="container">
+            <h1>Нова колекція</h1>
+            <span class="hero-line"></span>
+            <p class="hero-subtitle">Стиль. Якість. Характер.</p>
+            <a href="catalog.html" class="btn">Відкрити Каталог</a>
+        </div>
+    </section>
+
+    <section class="catalog">
+        <div class="container">
+            <h2 class="section-title fade-up">Популярні товари</h2>
+            <div class="product-grid">
+
+                <div class="product-card fade-up" data-id="p1" data-name="Футболка DNIPPROGES" data-category="tshirt" data-price="990" data-url="product.html">
+                    <a href="product.html" class="product-card-link">
+                        <div class="product-image-container">
+                            <img src="/img/fut1-front.png" alt="Футболка DNIPPROGES - вид спереду" class="product-image product-image-primary">
+                            <img src="/img/fut1-back.png" alt="Футболка DNIPPROGES - вид ззаду" class="product-image product-image-hover">
+                        </div>
+                        <h3 class="product-title">Футболка DNIPPROGES</h3>
+                        <p class="product-price">990 грн</p>
+                    </a>
+                    <button class="btn-buy">Додати в корзину</button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <a href="index.html" class="footer-logo">ZAZcustom</a>
+                <p class="footer-desc">Маніфест індивідуальності, втілений у тканині. Стиль, якість, характер.</p>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-heading">Навігація</h4>
+                <a href="index.html" class="footer-link">Головна</a>
+                <a href="catalog.html" class="footer-link">Каталог</a>
+                <a href="about.html" class="footer-link">Про нас</a>
+                <a href="contacts.html" class="footer-link">Контакти</a>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-heading">Контакти</h4>
+                <p class="footer-contact">📧 support@zazcustom.com</p>
+                <p class="footer-contact">📸 @zaz_custom</p>
+                <p class="footer-contact">📍 м. Запоріжжя</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
             <p>© 2025 ZAZcustom. Усі права захищені.</p>
         </div>
-    </footer>
-  <script src="script.js"></script> 
+    </div>
+</footer>
+
+<button class="scroll-top" id="scroll-top" aria-label="Вгору">↑</button>
+
+<script src="script.js"></script>
 </body>
 </html>
