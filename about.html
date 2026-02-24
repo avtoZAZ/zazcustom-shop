@@ -5,53 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Про нас - ZAZcustom</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header class="header">
-        <div class="container">
-            <div class="header-inner">
-                <a href="index.html" class="logo">ZAZcustom</a>
-                <nav class="nav">
-                    <a href="index.html" class="nav-link">Головна</a>
-                    <a href="catalog.html" class="nav-link">Каталог</a>
-                    <a href="about.html" class="nav-link">Про нас</a>
-                    <a href="contacts.html" class="nav-link">Контакти</a>
-                </nav>
-                <a href="cart.html" id="cart-link" class="cart-link">Корзина (0)</a>
+<header class="header">
+    <div class="container">
+        <div class="header-inner">
+            <a href="index.html" class="logo">ZAZcustom</a>
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav-link">Головна</a>
+                <a href="catalog.html" class="nav-link">Каталог</a>
+                <a href="about.html" class="nav-link">Про нас</a>
+                <a href="contacts.html" class="nav-link">Контакти</a>
+            </nav>
+            <div class="header-actions">
+                <a href="cart.html" id="cart-link" class="cart-link">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                    <span class="cart-badge" id="cart-badge">0</span>
+                </a>
+                <button class="burger-menu" id="burger-menu" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
-    <main>
-        <div class="container text-page-container">
-            <h1 class="page-title">Наша Історія</h1>
-            <div class="about-content">
-                <div class="about-image-wrapper">
-                    <!-- ЗАМЕНИТЕ ЭТО ФОТО НА СВОЕ! -->
-                    <img src="img/number-42_2227-1093.png" alt="Процес створення одягу ZAZcustom" class="about-image">
-                </div>
-                <div class="about-text">
-                    <h2>Філософія ZAZcustom</h2>
-                    <p>ZAZcustom — це не просто одяг. Це маніфест індивідуальності, втілений у тканині. Ми створюємо речі для тих, хто не боїться виділятися, хто цінує ручну роботу та глибокий сенс. Наш стиль поєднує в собі брутальність міських вулиць та містику давніх символів, створюючи унікальний візуальний код.</p>
-                    
-                    <h2>Якість у кожній деталі</h2>
-                    <p>Ми одержимі якістю. Кожна футболка, худі чи аксесуар проходить через наші руки. Ми використовуємо тільки щільну 100% бавовну, яка витримує десятки прань, та наносимо принти методом шовкографії. Це гарантує, що малюнок не потріскається і не втратить колір, залишаючись таким же яскравим, як і ваша особистість.</p>
-                    
-                    <a href="catalog.html" class="btn">Перейти до каталогу</a>
-                </div>
+<main>
+    <div class="container text-page-container">
+        <h1 class="page-title">Наша Історія</h1>
+        <div class="about-content">
+            <div class="about-image-wrapper fade-up">
+                <img src="img/number-42_2227-1093.png" alt="Процес створення одягу ZAZcustom" class="about-image">
+            </div>
+            <div class="about-text fade-up">
+                <h2>Філософія ZAZcustom</h2>
+                <p>ZAZcustom — це не просто одяг. Це маніфест індивідуальності, втілений у тканині. Ми створюємо речі для тих, хто не боїться виділятися, хто цінує ручну роботу та глибокий сенс. Наш стиль поєднує в собі брутальність міських вулиць та містику давніх символів, створюючи унікальний візуальний код.</p>
+
+                <h2>Якість у кожній деталі</h2>
+                <p>Ми одержимі якістю. Кожна футболка, худі чи аксесуар проходить через наші руки. Ми використовуємо тільки щільну 100% бавовну, яка витримує десятки прань, та наносимо принти методом шовкографії. Це гарантує, що малюнок не потріскається і не втратить колір, залишаючись таким же яскравим, як і ваша особистість.</p>
+
+                <a href="catalog.html" class="btn">Перейти до каталогу</a>
             </div>
         </div>
-    </main>
-    
-    <footer class="footer">
-        <div class="container">
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <a href="index.html" class="footer-logo">ZAZcustom</a>
+                <p class="footer-desc">Маніфест індивідуальності, втілений у тканині. Стиль, якість, характер.</p>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-heading">Навігація</h4>
+                <a href="index.html" class="footer-link">Головна</a>
+                <a href="catalog.html" class="footer-link">Каталог</a>
+                <a href="about.html" class="footer-link">Про нас</a>
+                <a href="contacts.html" class="footer-link">Контакти</a>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-heading">Контакти</h4>
+                <p class="footer-contact">📧 support@zazcustom.com</p>
+                <p class="footer-contact">📸 @zaz_custom</p>
+                <p class="footer-contact">📍 м. Запоріжжя</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
             <p>© 2025 ZAZcustom. Усі права захищені.</p>
         </div>
-    </footer>
+    </div>
+</footer>
 
-    <!-- Важно! Убедитесь, что script.js подключен -->
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

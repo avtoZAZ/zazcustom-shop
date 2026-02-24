@@ -1,6 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. ЛОГИКА КОРЗИНЫ (ГЛОБАЛЬНАЯ) ---
+    // --- 1. TOAST-СПОВІЩЕННЯ ---
+    function showToast(message) {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => toast.classList.add('show'));
+        });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
+
+    // --- 2. ЛОГІКА КОРЗИНИ (ГЛОБАЛЬНА) ---
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
     function saveCart() {
@@ -8,14 +28,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateCartCounter() {
-        const cartLink = document.getElementById('cart-link');
+        const cartBadge = document.getElementById('cart-badge');
+        if (!cartBadge) return;
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        if (cartLink) {
-            cartLink.textContent = `Корзина (${totalItems})`;
+        cartBadge.textContent = totalItems;
+        if (totalItems > 0) {
+            cartBadge.style.display = 'flex';
+        } else {
+            cartBadge.style.display = 'none';
         }
     }
 
-    // --- 2. ЛОГИКА ДОБАВЛЕНИЯ В КОРЗИНУ (для всех страниц) ---
+    // --- 3. ДОДАВАННЯ В КОРЗИНУ ---
     const addToCartButtons = document.querySelectorAll('.btn-buy, .btn-buy-lg');
     addToCartButtons.forEach(button => {
         button.addEventListener('click', (event) => {
@@ -23,15 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!productCard) return;
 
             let selectedSize = 'M';
-            const sizeSelector = productCard.querySelector('.size-selector .active');
-            
-            if (sizeSelector) {
-                selectedSize = sizeSelector.textContent;
+            const activeSizeBtn = productCard.querySelector('.size-selector .active');
+            if (activeSizeBtn) {
+                selectedSize = activeSizeBtn.textContent;
             } else {
-                const firstSizeButton = productCard.querySelector('.size-selector .size-btn');
-                if (firstSizeButton) {
-                    selectedSize = firstSizeButton.textContent;
-                }
+                const firstSizeBtn = productCard.querySelector('.size-selector .size-btn');
+                if (firstSizeBtn) selectedSize = firstSizeBtn.textContent;
             }
 
             let imageUrl = '';
@@ -40,9 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 imageUrl = imageInContainer.src;
             } else {
                 const mainImage = productCard.querySelector('.main-product-image') || productCard.querySelector('.product-image');
-                if (mainImage) {
-                    imageUrl = mainImage.src;
-                }
+                if (mainImage) imageUrl = mainImage.src;
             }
 
             const product = {
@@ -50,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 name: productCard.dataset.name,
                 price: parseFloat(productCard.dataset.price),
                 image: imageUrl,
-                // ИСПРАВЛЕНО: Добавлен запасной URL
                 url: productCard.dataset.url || 'product.html'
             };
 
@@ -65,11 +83,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             saveCart();
             updateCartCounter();
-            alert(`"${product.name}" (Розмір: ${selectedSize}) додано до корзини!`);
+
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                badge.classList.remove('pulse');
+                void badge.offsetWidth;
+                badge.classList.add('pulse');
+                setTimeout(() => badge.classList.remove('pulse'), 600);
+            }
+
+            showToast(`"${product.name}" (Розмір: ${selectedSize}) додано до корзини!`);
         });
     });
 
-    // --- 3. ЛОГИКА ТОЛЬКО ДЛЯ СТРАНИЦЫ КОРЗИНЫ ---
+    // --- 4. СТОРІНКА КОРЗИНИ ---
     if (document.body.classList.contains('cart-page')) {
         const cartItemsContainer = document.getElementById('cart-items-container');
         const cartSummary = document.getElementById('cart-summary');
@@ -142,70 +169,71 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCart();
             updateCartCounter();
         });
-        
-        orderForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const orderStatus = document.getElementById('order-status');
-            const submitButton = document.querySelector('#order-form button');
-            const customerName = document.getElementById('customer-name').value;
-            const customerPhone = document.getElementById('customer-phone').value;
-            const customerComment = document.getElementById('customer-comment').value;
 
-            let orderMessage = `🚨 *Нове замовлення з сайту ZAZcustom!* 🚨\n\n`;
-            orderMessage += `👤 **Клієнт:** ${customerName}\n`;
-            orderMessage += `📞 **Телефон:** ${customerPhone}\n`;
-            orderMessage += `💬 **Коментар:** ${customerComment || 'Немає'}\n\n`;
-            orderMessage += `---
-🛒 **Склад замовлення:**\n`;
-            
-            let total = 0;
-            cart.forEach(item => {
-                orderMessage += `\n- ${item.name}\n`;
-                orderMessage += `  *Розмір:* ${item.size}\n`;
-                orderMessage += `  *Кількість:* ${item.quantity}\n`;
-                orderMessage += `  *Ціна:* ${item.price} грн\n`;
-                total += item.price * item.quantity;
-            });
+        if (orderForm) {
+            orderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const orderStatus = document.getElementById('order-status');
+                const submitButton = document.querySelector('#order-form button[type="submit"]');
+                const customerName = document.getElementById('customer-name').value;
+                const customerPhone = document.getElementById('customer-phone').value;
+                const customerComment = document.getElementById('customer-comment').value;
 
-            orderMessage += `\n---\n💰 **Загальна сума:** *${total} грн*`;
-            
-            orderStatus.textContent = "Відправка...";
-            orderStatus.style.color = 'var(--text-color)';
-            submitButton.disabled = true;
-            
-            try {
-                const response = await fetch('/api/send-message', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: orderMessage, type: 'order' })
+                let orderMessage = `🚨 *Нове замовлення з сайту ZAZcustom!* 🚨\n\n`;
+                orderMessage += `👤 **Клієнт:** ${customerName}\n`;
+                orderMessage += `📞 **Телефон:** ${customerPhone}\n`;
+                orderMessage += `💬 **Коментар:** ${customerComment || 'Немає'}\n\n`;
+                orderMessage += `---\n🛒 **Склад замовлення:**\n`;
+
+                let total = 0;
+                cart.forEach(item => {
+                    orderMessage += `\n- ${item.name}\n`;
+                    orderMessage += `  *Розмір:* ${item.size}\n`;
+                    orderMessage += `  *Кількість:* ${item.quantity}\n`;
+                    orderMessage += `  *Ціна:* ${item.price} грн\n`;
+                    total += item.price * item.quantity;
                 });
 
-                if (response.ok) {
-                    orderStatus.textContent = "✅ Замовлення успішно відправлено!";
-                    orderStatus.style.color = 'lightgreen';
-                    cart = [];
-                    saveCart();
-                    renderCart();
-                    updateCartCounter();
-                    orderForm.reset();
-                } else {
-                    const result = await response.json();
-                    orderStatus.textContent = `Помилка: ${result.message || 'невідома помилка сервера'}`;
+                orderMessage += `\n---\n💰 **Загальна сума:** *${total} грн*`;
+
+                orderStatus.textContent = 'Відправка...';
+                orderStatus.style.color = 'var(--text-color)';
+                submitButton.disabled = true;
+
+                try {
+                    const response = await fetch('/api/send-message', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: orderMessage, type: 'order' })
+                    });
+
+                    if (response.ok) {
+                        orderStatus.textContent = '✅ Замовлення успішно відправлено!';
+                        orderStatus.style.color = 'lightgreen';
+                        cart = [];
+                        saveCart();
+                        renderCart();
+                        updateCartCounter();
+                        orderForm.reset();
+                    } else {
+                        const result = await response.json();
+                        orderStatus.textContent = `Помилка: ${result.message || 'невідома помилка сервера'}`;
+                        orderStatus.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Order submission error:', error);
+                    orderStatus.textContent = 'Помилка мережі.';
                     orderStatus.style.color = 'red';
+                } finally {
+                    submitButton.disabled = false;
                 }
-            } catch (error) {
-                console.error("Order submission error:", error);
-                orderStatus.textContent = 'Помилка мережі.';
-                orderStatus.style.color = 'red';
-            } finally {
-                 submitButton.disabled = false;
-            }
-        });
+            });
+        }
 
         renderCart();
     }
-    
-    // --- 4. ЛОГИКА ДЛЯ СТРАНИЦЫ ТОВАРА (ВЫБОР РАЗМЕРА) ---
+
+    // --- 5. ВИБІР РОЗМІРУ (СТОРІНКА ТОВАРУ) ---
     const sizeSelectorContainer = document.querySelector('.product-info .size-selector');
     if (sizeSelectorContainer) {
         sizeSelectorContainer.addEventListener('click', (e) => {
@@ -216,7 +244,98 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. ЛОГИКА ДЛЯ СТРАНИЦЫ КОНТАКТОВ (СТАТИЧЕСКАЯ КАПЧА) ---
+    // --- 6. ГАЛЕРЕЯ НА СТОРІНЦІ ТОВАРУ (JS, без :target) ---
+    const galleryMainView = document.querySelector('.gallery-main-view');
+    if (galleryMainView) {
+        const imageWrappers = galleryMainView.querySelectorAll('.gallery-image-wrapper');
+        const thumbnailBtns = document.querySelectorAll('.thumbnail-btn');
+
+        function showGalleryImage(index) {
+            imageWrappers.forEach((wrapper, i) => {
+                wrapper.classList.toggle('active', i === index);
+            });
+            thumbnailBtns.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+        }
+
+        if (imageWrappers.length > 0) {
+            showGalleryImage(0);
+        }
+
+        thumbnailBtns.forEach((btn, index) => {
+            btn.addEventListener('click', () => showGalleryImage(index));
+        });
+    }
+
+    // --- 7. ФІЛЬТРИ КАТАЛОГУ ---
+    const filterBar = document.querySelector('.filter-bar');
+    const catalogSearch = document.getElementById('catalog-search');
+    const catalogSort = document.getElementById('catalog-sort');
+    const productGrid = document.querySelector('.product-grid');
+
+    if (filterBar || catalogSearch || catalogSort) {
+        const productCards = productGrid ? Array.from(productGrid.querySelectorAll('.product-card')) : [];
+
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let currentSort = 'default';
+
+        function applyFilters() {
+            let visible = productCards.filter(card => {
+                const matchCategory = currentFilter === 'all' || card.dataset.category === currentFilter;
+                const cardName = (card.dataset.name || card.querySelector('.product-title')?.textContent || '').toLowerCase();
+                const matchSearch = cardName.includes(currentSearch.toLowerCase());
+                return matchCategory && matchSearch;
+            });
+
+            let hidden = productCards.filter(card => !visible.includes(card));
+
+            if (currentSort !== 'default' && productGrid) {
+                visible.sort((a, b) => {
+                    if (currentSort === 'price-asc') return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    if (currentSort === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                    if (currentSort === 'name-asc') {
+                        const nameA = a.dataset.name || '';
+                        const nameB = b.dataset.name || '';
+                        return nameA.localeCompare(nameB, 'uk');
+                    }
+                    return 0;
+                });
+                visible.forEach(card => productGrid.appendChild(card));
+            }
+
+            productCards.forEach(card => card.classList.remove('hidden'));
+            hidden.forEach(card => card.classList.add('hidden'));
+        }
+
+        if (filterBar) {
+            filterBar.addEventListener('click', (event) => {
+                const targetButton = event.target.closest('.filter-btn');
+                if (!targetButton) return;
+                filterBar.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                targetButton.classList.add('active');
+                currentFilter = targetButton.dataset.filter;
+                applyFilters();
+            });
+        }
+
+        if (catalogSearch) {
+            catalogSearch.addEventListener('input', (e) => {
+                currentSearch = e.target.value;
+                applyFilters();
+            });
+        }
+
+        if (catalogSort) {
+            catalogSort.addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                applyFilters();
+            });
+        }
+    }
+
+    // --- 8. КОНТАКТНА ФОРМА З КАПЧЕЮ ---
     const contactForm = document.getElementById('contact-form');
     if (contactForm) {
         const captchaLabel = document.getElementById('captcha-label');
@@ -265,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusMessage.style.color = 'red';
                     generateCaptcha();
                 }
-
             } catch (error) {
                 console.error('Contact form error:', error);
                 statusMessage.textContent = 'Помилка мережі. Спробуйте пізніше.';
@@ -276,41 +394,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- ОБЩАЯ ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ЛЮБОЙ СТРАНИЦЫ ---
-    updateCartCounter();
-});
-    // --- 6. ЛОГИКА ФИЛЬТРА В КАТАЛОГЕ ---
-    const filterBar = document.querySelector('.filter-bar');
-    const productCards = document.querySelectorAll('.product-grid .product-card');
+    // --- 9. SCROLL-TO-TOP ---
+    const scrollTopBtn = document.getElementById('scroll-top');
+    if (scrollTopBtn) {
+        window.addEventListener('scroll', () => {
+            scrollTopBtn.classList.toggle('visible', window.scrollY > 300);
+        });
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 
-    // Этот код сработает, только если на странице есть фильтр
-    if (filterBar && productCards.length > 0) {
-        
-        filterBar.addEventListener('click', (event) => {
-            // Убеждаемся, что кликнули именно по кнопке
-            const targetButton = event.target.closest('.filter-btn');
-            if (!targetButton) return;
+    // --- 10. HEADER SCROLL EFFECT ---
+    const header = document.querySelector('.header');
+    if (header) {
+        window.addEventListener('scroll', () => {
+            header.classList.toggle('header-scrolled', window.scrollY > 50);
+        });
+    }
 
-            // Убираем класс 'active' у всех кнопок
-            filterBar.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            // Добавляем класс 'active' только нажатой кнопке
-            targetButton.classList.add('active');
-
-            const filterValue = targetButton.dataset.filter;
-
-            // Проходимся по каждой карточке товара
-            productCards.forEach(card => {
-                const cardCategory = card.dataset.category;
-
-                // Если категория совпадает или выбраны "Все", показываем карточку
-                if (filterValue === 'all' || filterValue === cardCategory) {
-                    card.classList.remove('hidden');
-                } else {
-                    // Иначе - прячем
-                    card.classList.add('hidden');
+    // --- 11. SCROLL-АНІМАЦІЇ (INTERSECTION OBSERVER) ---
+    const fadeUpElements = document.querySelectorAll('.fade-up');
+    if (fadeUpElements.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
                 }
+            });
+        }, { threshold: 0.15 });
+
+        fadeUpElements.forEach(el => observer.observe(el));
+    }
+
+    // --- 12. БУРГЕР-МЕНЮ ---
+    const burgerMenu = document.getElementById('burger-menu');
+    const nav = document.getElementById('nav');
+
+    if (burgerMenu && nav) {
+        burgerMenu.addEventListener('click', () => {
+            burgerMenu.classList.toggle('active');
+            nav.classList.toggle('active');
+        });
+
+        nav.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                burgerMenu.classList.remove('active');
+                nav.classList.remove('active');
             });
         });
     }
+
+    // --- ІНІЦІАЛІЗАЦІЯ ---
+    updateCartCounter();
+});
