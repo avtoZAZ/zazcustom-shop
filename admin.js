@@ -11,6 +11,23 @@ function escapeHtml(str) {
         .replace(/'/g, '&#039;');
 }
 
+// Адмін toast-сповіщення
+function showAdminToast(message) {
+    const existing = document.querySelector('.admin-toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'admin-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => toast.classList.add('show'));
+    });
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
 // SHA-256 через Web Crypto API
 async function sha256(message) {
     const msgBuffer = new TextEncoder().encode(message);
@@ -22,9 +39,15 @@ async function sha256(message) {
 // Захешований пароль "zazcustom2025"
 const ADMIN_PASSWORD_HASH = 'ca1345a029338478fe2447a40d2b25dc33d84eba4b1c091524bef029a39837b9';
 
+// --- КОНСТАНТИ CLOUDINARY ---
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/drqnyw0ox/image/upload';
+const CLOUDINARY_PRESET = 'zazshop';
+const PRODUCTS_STORAGE_KEY = 'zazcustom_products';
+
 // Стан
 let products = [];
 let editingProductId = null;
+let uploadedImages = []; // масив URL завантажених фото для поточної форми
 
 // --- АВТОРИЗАЦІЯ ---
 async function checkAuth() {
@@ -48,7 +71,7 @@ function logout() {
 
 // --- ЗАВАНТАЖЕННЯ / ЗБЕРЕЖЕННЯ ТОВАРІВ ---
 async function loadAdminProducts() {
-    const localData = localStorage.getItem('zazcustom_products');
+    const localData = localStorage.getItem(PRODUCTS_STORAGE_KEY);
     if (localData) {
         try {
             products = JSON.parse(localData);
@@ -66,7 +89,7 @@ async function loadAdminProducts() {
 }
 
 function saveProducts() {
-    localStorage.setItem('zazcustom_products', JSON.stringify(products));
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
 }
 
 // --- CRUD ---
@@ -181,26 +204,10 @@ function showProductForm(productId = null) {
         if (cb) cb.checked = selectedSizes.includes(size);
     });
 
-    // Фото
-    const imageFields = document.getElementById('image-fields');
-    const images = product ? (product.images || ['']) : [''];
-    imageFields.innerHTML = images.map((img, i) => createImageFieldHTML(img, i === 0)).join('');
-}
-
-function createImageFieldHTML(value = '', isFirst = false) {
-    return `
-        <div class="image-field-row">
-            <input type="text" placeholder="/img/назва-фото.png" value="${value}">
-            ${isFirst ? '' : '<button type="button" onclick="this.closest(\'.image-field-row\').remove()" title="Видалити">×</button>'}
-        </div>
-    `;
-}
-
-function addImageField() {
-    const imageFields = document.getElementById('image-fields');
-    const newRow = document.createElement('div');
-    newRow.innerHTML = createImageFieldHTML('', false);
-    imageFields.appendChild(newRow.firstElementChild);
+    // Ініціалізація завантажених фото
+    uploadedImages = product ? (product.images || []).map(url => ({ url, status: 'success' })) : [];
+    renderImagePreviews();
+    setupUploadZone();
 }
 
 function hideProductForm() {
@@ -209,6 +216,7 @@ function hideProductForm() {
     if (form) form.style.display = 'none';
     if (list) list.style.display = 'block';
     editingProductId = null;
+    uploadedImages = [];
 }
 
 function saveProductForm() {
@@ -216,11 +224,11 @@ function saveProductForm() {
     const priceVal = document.getElementById('field-price').value.trim();
 
     if (!name) {
-        alert('Назва товару обов\'язкова!');
+        showAdminToast('Назва товару обов\'язкова!');
         return;
     }
     if (!priceVal || isNaN(parseFloat(priceVal))) {
-        alert('Вкажіть коректну ціну!');
+        showAdminToast('Вкажіть коректну ціну!');
         return;
     }
 
@@ -230,8 +238,9 @@ function saveProductForm() {
         return cb && cb.checked;
     });
 
-    const imageInputs = document.querySelectorAll('#image-fields .image-field-row input');
-    const images = Array.from(imageInputs).map(inp => inp.value.trim()).filter(v => v);
+    const images = uploadedImages
+        .filter(img => img.status === 'success' && img.url)
+        .map(img => img.url);
 
     const productData = {
         id: document.getElementById('field-id').value.trim(),
@@ -253,6 +262,116 @@ function saveProductForm() {
     } else {
         addProduct(productData);
     }
+}
+
+// --- CLOUDINARY UPLOAD ---
+async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_PRESET);
+
+    const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+    if (!response.ok) throw new Error(`Upload failed with status ${response.status}`);
+    const data = await response.json();
+    return data.secure_url;
+}
+
+function setupUploadZone() {
+    const zone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    if (!zone || !fileInput) return;
+
+    // Клік по зоні відкриває file picker
+    zone.onclick = () => fileInput.click();
+
+    // Drag & drop
+    zone.ondragover = (e) => {
+        e.preventDefault();
+        zone.classList.add('dragover');
+    };
+    zone.ondragleave = () => zone.classList.remove('dragover');
+    zone.ondrop = (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        handleFiles(Array.from(e.dataTransfer.files));
+    };
+
+    fileInput.onchange = (e) => {
+        handleFiles(Array.from(e.target.files));
+        fileInput.value = '';
+    };
+}
+
+async function handleFiles(files) {
+    const imageFiles = files.filter(f => f.type.startsWith('image/'));
+    if (!imageFiles.length) {
+        showAdminToast('Обрані файли не є зображеннями. Оберіть PNG, JPG або WEBP.');
+        return;
+    }
+
+    for (const file of imageFiles) {
+        // Показати превью одразу через FileReader
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        const imgEntry = { url: '', previewUrl: '', status: 'uploading' };
+        const index = uploadedImages.length;
+        uploadedImages.push(imgEntry);
+        renderImagePreviews();
+
+        reader.onload = (e) => {
+            uploadedImages[index].previewUrl = e.target.result;
+            renderImagePreviews();
+        };
+
+        try {
+            const secureUrl = await uploadToCloudinary(file);
+            uploadedImages[index].url = secureUrl;
+            uploadedImages[index].status = 'success';
+        } catch (err) {
+            uploadedImages[index].status = 'error';
+            console.error('Cloudinary upload error:', err);
+            showAdminToast(`Помилка завантаження "${file.name}": ${err.message}`);
+        }
+        renderImagePreviews();
+    }
+}
+
+function renderImagePreviews() {
+    const container = document.getElementById('image-previews');
+    if (!container) return;
+
+    if (uploadedImages.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = uploadedImages.map((img, i) => {
+        const displayUrl = img.url || img.previewUrl || '';
+        const isPrimary = i === 0;
+        const statusClass = img.status;
+        const statusText = img.status === 'uploading' ? '⏳ Завантаження...'
+            : img.status === 'success' ? '✓'
+            : '✗ Помилка';
+
+        return `
+            <div class="image-preview${isPrimary ? ' primary' : ''}">
+                ${displayUrl ? `<img src="${escapeHtml(displayUrl)}" alt="фото ${i + 1}">` : ''}
+                ${isPrimary ? '<span class="primary-badge">Головне</span>' : ''}
+                <button class="remove-image" data-index="${i}" title="Видалити">×</button>
+                <div class="upload-status ${statusClass}">${statusText}</div>
+            </div>
+        `;
+    }).join('');
+
+    // Делегування подій для видалення
+    container.onclick = (e) => {
+        const btn = e.target.closest('.remove-image');
+        if (!btn) return;
+        const index = parseInt(btn.dataset.index, 10);
+        uploadedImages.splice(index, 1);
+        renderImagePreviews();
+    };
 }
 
 // --- ЕКСПОРТ ---
@@ -304,12 +423,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addNewBtn = document.getElementById('add-new-btn');
     if (addNewBtn) {
         addNewBtn.addEventListener('click', () => showProductForm(null));
-    }
-
-    // Кнопка "Додати ще фото"
-    const addImageBtn = document.getElementById('add-image-btn');
-    if (addImageBtn) {
-        addImageBtn.addEventListener('click', addImageField);
     }
 
     // Кнопка "Зберегти"
