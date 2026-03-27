@@ -247,7 +247,7 @@ function saveProductForm() {
         name: name,
         price: parseFloat(priceVal),
         category: document.getElementById('field-category').value,
-        url: document.getElementById('field-url').value.trim() || ('product-' + document.getElementById('field-id').value.trim() + '.html'),
+        url: document.getElementById('field-url').value.trim() || 'product.html',
         description: document.getElementById('field-description').value.trim(),
         composition: document.getElementById('field-composition').value.trim(),
         care: document.getElementById('field-care').value.trim(),
